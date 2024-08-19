@@ -3,7 +3,7 @@
 
 This is a minimal accounting desktop application built with [Wails](https://wails.io/), [React](https://reactjs.org/), and [TypeScript](https://www.typescriptlang.org/). The application allows users to input and save their total assets locally using an SQLite database. 
 
-Aim to provide a simple accounting application that can be used to track assets and liabilities. Ultimately, help everyone to become **hó-gia̍h-lâng**, Twiwanese for rich people 💰.
+Aim to provide a simple accounting application that can be used to track assets and liabilities. Ultimately, help everyone to become **hó-gia̍h-lâng**, Taiwanese for rich people 💰.
 
 ## Features
 
