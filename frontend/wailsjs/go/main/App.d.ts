@@ -3,6 +3,4 @@
 
 export function FetchLatestAsset():Promise<number>;
 
-export function Greet(arg1:string):Promise<string>;
-
 export function SaveAsset(arg1:number):Promise<void>;
