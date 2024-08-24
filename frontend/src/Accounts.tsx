@@ -4,7 +4,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
-import {AddAccount, FetchAccountDetails} from "../wailsjs/go/main/App";
+import {AddAccount, FetchAccountDetails, UpdateCash} from "../wailsjs/go/main/App";
 import { Add } from '@mui/icons-material';
 
 type Investment = {
@@ -47,9 +47,9 @@ const BankingInvestmentPage = () => {
         fetchAccount();
     }, [openAddAccount, openEditAccount]);
     const selectedAccount = accounts.find(account => account.id === selectedAccountId);
-    const totalWealth = selectedAccount?.investments.reduce((sum, investment) => sum + investment.amount, 0);
+    const totalWealth = selectedAccount?.investments?.reduce((sum, investment) => sum + investment.amount, 0) ?? 0;
 
-    const portfolioData = selectedAccount?.investments.map((investment, index) => ({
+    const portfolioData = selectedAccount?.investments?.map((investment, index) => ({
         name: investment.name,
         value: investment.amount,
         color: COLORS[index % COLORS.length],
@@ -57,11 +57,11 @@ const BankingInvestmentPage = () => {
 
     // Calculate overall data across all accounts categorized by 'category'
     const overallData = accounts.reduce((acc, account) => {
-        account.investments.forEach(investment => {
-        if (!acc[investment.category]) {
-            acc[investment.category] = { name: investment.category, value: 0 };
-        }
-        acc[investment.category].value += investment.amount;
+        account.investments?.forEach(investment => {
+            if (!acc[investment.category]) {
+                acc[investment.category] = { name: investment.category, value: 0 };
+            }
+            acc[investment.category].value += investment.amount;
         });
         return acc;
     }, {} as Record<string, { name: string; value: number }>);
@@ -112,7 +112,7 @@ const BankingInvestmentPage = () => {
 
     // Function to handle saving the edited account details
     const handleSaveAccount = () => {
-        console.log('Edited Cash:', editedCash);
+        UpdateCash(selectedAccountId, editedCash);
         console.log('Edited Investments:', editedInvestments);
         // Here, you would implement the logic to save the edited account details
         setOpenEditAccount(false);
@@ -151,7 +151,7 @@ const BankingInvestmentPage = () => {
                                 <Typography component="span" variant="body2" color="textPrimary">
                                     {account.holder}
                                 </Typography>
-                                {` - ${account.cash + (totalWealth ?? 0)} $`}
+                                {` - ${account.cash + (account.investments?.reduce((sum, investment) => sum + investment.amount, 0) ?? 0)} $`}
                             </>
                         }
                     />
@@ -238,7 +238,7 @@ const BankingInvestmentPage = () => {
                 <Typography variant="h6" style={{ marginTop: '20px' }}>
                 Investment
                 </Typography>
-                {selectedAccount?.investments.map((investment, index) => (
+                {selectedAccount?.investments?.map((investment, index) => (
                     <Paper key={index} style={{ padding: '10px', marginBottom: '10px' }}>
                         <Typography variant="subtitle1">{investment.name}</Typography>
                         <Typography variant="body2">{investment.category}</Typography>

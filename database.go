@@ -127,24 +127,3 @@ func GetAccountDetails(userId int64) ([]*account, error) {
 	}
 	return accounts, nil
 }
-
-func StoreAsset(amount float64) error {
-	if db == nil {
-		return fmt.Errorf("database connection is not initialized")
-	}
-	stmt, err := db.Prepare("INSERT INTO assets(amount) VALUES(?)")
-	if err != nil {
-		return err
-	}
-	_, err = stmt.Exec(amount)
-	return err
-}
-
-func GetLatestAsset() (float64, error) {
-	if db == nil {
-		return 0, fmt.Errorf("database connection is not initialized")
-	}
-	var amount float64
-	err := db.QueryRow("SELECT amount FROM assets ORDER BY id DESC LIMIT 1").Scan(&amount)
-	return amount, err
-}
