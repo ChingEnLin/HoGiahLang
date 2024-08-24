@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, Container, Grid, Typography, Paper, List, ListItem, ListItemText, Switch, FormControlLabel, IconButton, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import {AddAccount, FetchAccountDetails} from "../wailsjs/go/main/App";
+import { Add } from '@mui/icons-material';
 
 type Investment = {
   name: string;
@@ -17,44 +19,34 @@ type Account = {
   cash: number;
   investments: Investment[];
 };
-// Mock data
-const mockAccounts: Account[] = [
-    {
-        id: 1,
-        name: 'Account 1',
-        holder: 'John Doe',
-        cash: 10000,
-        investments: [
-        { name: 'Stock A', category: 'Stock', amount: 5000 },
-        { name: 'Stock B', category: 'Stock', amount: 3000 },
-        { name: 'ETF A', category: 'ETF', amount: 2000 },
-        ],
-    },
-    {
-        id: 2,
-        name: 'Account2',
-        holder: 'John Doe',
-        cash: 5000,
-        investments: [
-        { name: 'Bond A', category: 'Bond', amount: 3000 },
-        { name: 'Bond B', category: 'Bond', amount: 2000 },
-        ],
-    },
-    ];
-
+ 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'];
 
 const BankingInvestmentPage = () => {
-    const [selectedAccountId, setSelectedAccountId] = useState(mockAccounts[0].id);
+    const [accounts, setAccounts] = useState<Account[]>([]);
+    const [selectedAccountId, setSelectedAccountId] = useState(0);
     const [showOverallData, setShowOverallData] = useState(false);
     const [openAddAccount, setOpenAddAccount] = useState(false);
     const [openEditAccount, setOpenEditAccount] = useState(false);
     const [newAccountName, setNewAccountName] = useState('');
     const [newAccountHolder, setNewAccountHolder] = useState('');
     const [editedCash, setEditedCash] = useState(0);
-    const [editedInvestments, setEditedInvestments] = useState([...mockAccounts[0].investments]);
+    const [editedInvestments, setEditedInvestments] = useState([{ name: '', category: '', amount: 0 }]);
 
-    const selectedAccount = mockAccounts.find(account => account.id === selectedAccountId);
+    const fetchAccount = () => {
+        FetchAccountDetails(1)
+            .then(response => {
+                console.log("response", response);
+                setAccounts(response);
+            })
+            .catch(error => {
+                console.error("error getting backend", error);
+            });
+    };
+    useEffect(() => {
+        fetchAccount();
+    }, [openAddAccount, openEditAccount]);
+    const selectedAccount = accounts.find(account => account.id === selectedAccountId);
     const totalWealth = selectedAccount?.investments.reduce((sum, investment) => sum + investment.amount, 0);
 
     const portfolioData = selectedAccount?.investments.map((investment, index) => ({
@@ -64,7 +56,7 @@ const BankingInvestmentPage = () => {
     }));
 
     // Calculate overall data across all accounts categorized by 'category'
-    const overallData = mockAccounts.reduce((acc, account) => {
+    const overallData = accounts.reduce((acc, account) => {
         account.investments.forEach(investment => {
         if (!acc[investment.category]) {
             acc[investment.category] = { name: investment.category, value: 0 };
@@ -90,9 +82,7 @@ const BankingInvestmentPage = () => {
 
     // Function to handle the addition of a new account
     const handleAddAccount = () => {
-        console.log('New Account Name:', newAccountName);
-        console.log('New Account Holder:', newAccountHolder);
-        // Here, you would implement the logic to add the account
+        AddAccount(1, newAccountName, newAccountHolder);
         setOpenAddAccount(false);
     };
 
@@ -147,7 +137,7 @@ const BankingInvestmentPage = () => {
                 <EditIcon />
                 </IconButton>
                 <List>
-                {mockAccounts.map(account => (
+                {accounts.map(account => (
                     <ListItem
                     button
                     key={account.id}

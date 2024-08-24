@@ -67,6 +67,67 @@ func AddInvestment(accountId int64, investmentName string, category string, amou
 	return err
 }
 
+type investment struct {
+	Name     string  `json:"name"`
+	Category string  `json:"category"`
+	Amount   float64 `json:"amount"`
+}
+type account struct {
+	Id          int64        `json:"id"`
+	Name        string       `json:"name"`
+	Holder      string       `json:"holder"`
+	Cash        float64      `json:"cash"`
+	Investments []investment `json:"investments"`
+}
+
+func GetAccountDetails(userId int64) ([]*account, error) {
+	if db == nil {
+		return nil, fmt.Errorf("database connection is not initialized")
+	}
+	// for each account of the user
+	accountsQuery := `SELECT id, account_name, holder_name FROM accounts WHERE user_id = ?`
+	rows, err := db.Query(accountsQuery, userId)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch accounts: %v", err)
+	}
+	defer rows.Close()
+	var accounts []*account
+	for rows.Next() {
+		account := &account{}
+		err := rows.Scan(&account.Id, &account.Name, &account.Holder)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan account: %v", err)
+		}
+		// get cash amount with account id
+		err = db.QueryRow("SELECT amount FROM cash WHERE account_id = ?", account.Id).Scan(&account.Cash)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				account.Investments = []investment{} // Initialize empty array
+				accounts = append(accounts, account) // Add account to the list
+				continue                             // No investments found, continue to next account
+			}
+			return nil, fmt.Errorf("failed to fetch cash: %v", err)
+		}
+		// get investments with account id
+		investmentQuery := `SELECT investment_name, category, amount FROM investments WHERE account_id = ?`
+		rows, err := db.Query(investmentQuery, account.Id)
+		if err != nil {
+			return nil, fmt.Errorf("failed to fetch investments: %v", err)
+		}
+		defer rows.Close()
+		for rows.Next() {
+			investment := investment{}
+			err := rows.Scan(&investment.Name, &investment.Category, &investment.Amount)
+			if err != nil {
+				return nil, fmt.Errorf("failed to scan investment: %v", err)
+			}
+			account.Investments = append(account.Investments, investment)
+		}
+		accounts = append(accounts, account)
+	}
+	return accounts, nil
+}
+
 func StoreAsset(amount float64) error {
 	if db == nil {
 		return fmt.Errorf("database connection is not initialized")

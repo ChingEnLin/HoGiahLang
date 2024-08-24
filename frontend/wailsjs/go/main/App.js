@@ -14,6 +14,10 @@ export function AddUser(arg1) {
   return window['go']['main']['App']['AddUser'](arg1);
 }
 
+export function FetchAccountDetails(arg1) {
+  return window['go']['main']['App']['FetchAccountDetails'](arg1);
+}
+
 export function UpdateCash(arg1, arg2) {
   return window['go']['main']['App']['UpdateCash'](arg1, arg2);
 }
