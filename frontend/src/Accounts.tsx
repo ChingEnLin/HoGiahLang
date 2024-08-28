@@ -4,10 +4,11 @@ import EditIcon from '@mui/icons-material/Edit';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
-import {AddAccount, FetchAccountDetails, UpdateCash} from "../wailsjs/go/main/App";
-import { Add } from '@mui/icons-material';
+import {AddAccount, FetchAccountDetails, UpdateCash, UpdateInvestment} from "../wailsjs/go/main/App";
 
 type Investment = {
+  id: number;
+  account_id: number;
   name: string;
   category: string;
   amount: number;
@@ -31,12 +32,11 @@ const BankingInvestmentPage = () => {
     const [newAccountName, setNewAccountName] = useState('');
     const [newAccountHolder, setNewAccountHolder] = useState('');
     const [editedCash, setEditedCash] = useState(0);
-    const [editedInvestments, setEditedInvestments] = useState([{ name: '', category: '', amount: 0 }]);
+    const [editedInvestments, setEditedInvestments] = useState<Investment[]>([]);
 
     const fetchAccount = () => {
         FetchAccountDetails(1)
             .then(response => {
-                console.log("response", response);
                 setAccounts(response);
             })
             .catch(error => {
@@ -100,7 +100,7 @@ const BankingInvestmentPage = () => {
     const handleClickOpenEditAccount = () => {
         if (selectedAccount) {
             setEditedCash(selectedAccount.cash);
-            setEditedInvestments([...selectedAccount.investments]);
+            setEditedInvestments([...selectedAccount.investments ?? []]);
             setOpenEditAccount(true);
         }
     };
@@ -114,7 +114,7 @@ const BankingInvestmentPage = () => {
     const handleSaveAccount = () => {
         UpdateCash(selectedAccountId, editedCash);
         console.log('Edited Investments:', editedInvestments);
-        // Here, you would implement the logic to save the edited account details
+        UpdateInvestment(editedInvestments);
         setOpenEditAccount(false);
     };
 
@@ -240,9 +240,17 @@ const BankingInvestmentPage = () => {
                 </Typography>
                 {selectedAccount?.investments?.map((investment, index) => (
                     <Paper key={index} style={{ padding: '10px', marginBottom: '10px' }}>
-                        <Typography variant="subtitle1">{investment.name}</Typography>
-                        <Typography variant="body2">{investment.category}</Typography>
-                        <Typography variant="body1">{`USD ${investment.amount} $`}</Typography>
+                        <ListItemText
+                            primary={`${investment.name}`}
+                            secondary={
+                                <>
+                                    <Typography component="span" variant="body2" color="textPrimary">
+                                        {investment.category}
+                                    </Typography>
+                                    {` - ${`USD ${investment.amount} $`}`}
+                                </>
+                            }
+                        />
                     </Paper>
                 ))}
             </Paper>
@@ -293,45 +301,55 @@ const BankingInvestmentPage = () => {
             />
             <DialogContentText>Investments</DialogContentText>
             {editedInvestments.map((investment, index) => (
-                <div key={index}>
-                <TextField
-                    margin="dense"
-                    label="Investment Name"
-                    fullWidth
-                    value={investment.name}
-                    onChange={(e) => {
-                    const newInvestments = [...editedInvestments];
-                    newInvestments[index].name = e.target.value;
-                    setEditedInvestments(newInvestments);
+                <Paper
+                    key={index}
+                    style={{
+                        padding: '16px',
+                        marginBottom: '16px',
+                        backgroundColor: '#f5f5f5', // Slightly darker background
+                        borderRadius: '8px', // Rounded corners
+                        width: '300px', // Fixed width for consistency
                     }}
-                />
-                <TextField
-                    margin="dense"
-                    label="Category"
-                    fullWidth
-                    value={investment.category}
-                    onChange={(e) => {
-                    const newInvestments = [...editedInvestments];
-                    newInvestments[index].category = e.target.value;
-                    setEditedInvestments(newInvestments);
-                    }}
-                />
-                <TextField
-                    margin="dense"
-                    label="Amount"
-                    type="number"
-                    fullWidth
-                    value={investment.amount}
-                    onChange={(e) => {
-                    const newInvestments = [...editedInvestments];
-                    newInvestments[index].amount = Number(e.target.value);
-                    setEditedInvestments(newInvestments);
-                    }}
-                />
-                </div>
+                    elevation={3}
+                >
+                    <TextField
+                        margin="dense"
+                        label="Investment Name"
+                        fullWidth
+                        value={investment.name}
+                        onChange={(e) => {
+                        const newInvestments = [...editedInvestments];
+                        newInvestments[index].name = e.target.value;
+                        setEditedInvestments(newInvestments);
+                        }}
+                    />
+                    <TextField
+                        margin="dense"
+                        label="Category"
+                        fullWidth
+                        value={investment.category}
+                        onChange={(e) => {
+                        const newInvestments = [...editedInvestments];
+                        newInvestments[index].category = e.target.value;
+                        setEditedInvestments(newInvestments);
+                        }}
+                    />
+                    <TextField
+                        margin="dense"
+                        label="Amount"
+                        type="number"
+                        fullWidth
+                        value={investment.amount}
+                        onChange={(e) => {
+                        const newInvestments = [...editedInvestments];
+                        newInvestments[index].amount = Number(e.target.value);
+                        setEditedInvestments(newInvestments);
+                        }}
+                    />
+                </Paper>
             ))}
             <Button
-                onClick={() => setEditedInvestments([...editedInvestments, { name: '', category: '', amount: 0 }])}
+                onClick={() => setEditedInvestments([...editedInvestments, { id: 0, account_id: selectedAccountId, name: '', category: '', amount: 0 }])}
                 color="primary"
             >
                 Add Investment

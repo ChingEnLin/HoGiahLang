@@ -32,8 +32,8 @@ func (a *App) UpdateCash(accountId int64, amount float64) error {
 	return UpdateCash(accountId, amount)
 }
 
-func (a *App) AddInvestment(accountId int64, investmentName string, category string, amount float64) error {
-	return AddInvestment(accountId, investmentName, category, amount)
+func (a *App) UpdateInvestment(investments []*investment) error {
+	return UpdateInvestment(investments)
 }
 
 func (a *App) FetchAccountDetails(accountId int64) ([]*account, error) {

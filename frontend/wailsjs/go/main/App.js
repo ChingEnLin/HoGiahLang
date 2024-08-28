@@ -6,10 +6,6 @@ export function AddAccount(arg1, arg2, arg3) {
   return window['go']['main']['App']['AddAccount'](arg1, arg2, arg3);
 }
 
-export function AddInvestment(arg1, arg2, arg3, arg4) {
-  return window['go']['main']['App']['AddInvestment'](arg1, arg2, arg3, arg4);
-}
-
 export function AddUser(arg1) {
   return window['go']['main']['App']['AddUser'](arg1);
 }
@@ -20,4 +16,8 @@ export function FetchAccountDetails(arg1) {
 
 export function UpdateCash(arg1, arg2) {
   return window['go']['main']['App']['UpdateCash'](arg1, arg2);
+}
+
+export function UpdateInvestment(arg1) {
+  return window['go']['main']['App']['UpdateInvestment'](arg1);
 }

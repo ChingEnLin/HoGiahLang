@@ -1,6 +1,8 @@
 export namespace main {
 	
 	export class investment {
+	    id: number;
+	    account_id: number;
 	    name: string;
 	    category: string;
 	    amount: number;
@@ -11,6 +13,8 @@ export namespace main {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.account_id = source["account_id"];
 	        this.name = source["name"];
 	        this.category = source["category"];
 	        this.amount = source["amount"];

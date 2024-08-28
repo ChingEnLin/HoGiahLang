@@ -4,10 +4,10 @@ import {main} from '../models';
 
 export function AddAccount(arg1:number,arg2:string,arg3:string):Promise<number>;
 
-export function AddInvestment(arg1:number,arg2:string,arg3:string,arg4:number):Promise<void>;
-
 export function AddUser(arg1:string):Promise<number>;
 
 export function FetchAccountDetails(arg1:number):Promise<Array<main.account>>;
 
 export function UpdateCash(arg1:number,arg2:number):Promise<void>;
+
+export function UpdateInvestment(arg1:Array<main.investment>):Promise<void>;

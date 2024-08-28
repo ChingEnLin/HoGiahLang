@@ -55,22 +55,41 @@ func UpdateCash(accountId int64, amount float64) error {
 	if db == nil {
 		return fmt.Errorf("database connection is not initialized")
 	}
-	_, err := db.Exec("INSERT INTO cash (account_id, amount) VALUES (?, ?)", accountId, amount)
+	query := `INSERT OR REPLACE INTO cash (id, account_id, amount) 
+	VALUES ((SELECT id FROM cash WHERE account_id = ?), ?, ?)`
+	_, err := db.Exec(query, accountId, accountId, amount)
 	return err
 }
 
-func AddInvestment(accountId int64, investmentName string, category string, amount float64) error {
+func UpdateInvestment(investments []*investment) error {
 	if db == nil {
 		return fmt.Errorf("database connection is not initialized")
 	}
-	_, err := db.Exec("INSERT INTO investments (account_id, investment_name, category, amount) VALUES (?, ?, ?, ?)", accountId, investmentName, category, amount)
-	return err
+	// Update investments based on id, if id is null, insert new investment
+	for _, inv := range investments {
+		if inv.Id == 0 {
+			_, err := db.Exec("INSERT INTO investments (account_id, investment_name, category, amount) VALUES (?, ?, ?, ?)",
+				inv.AccountId, inv.Name, inv.Category, inv.Amount)
+			if err != nil {
+				return err
+			}
+		} else {
+			_, err := db.Exec("UPDATE investments SET investment_name = ?, category = ?, amount = ? WHERE id = ?",
+				inv.Name, inv.Category, inv.Amount, inv.Id)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 type investment struct {
-	Name     string  `json:"name"`
-	Category string  `json:"category"`
-	Amount   float64 `json:"amount"`
+	Id        int64   `json:"id"`
+	AccountId int64   `json:"account_id"`
+	Name      string  `json:"name"`
+	Category  string  `json:"category"`
+	Amount    float64 `json:"amount"`
 }
 type account struct {
 	Id          int64        `json:"id"`
@@ -101,23 +120,23 @@ func GetAccountDetails(userId int64) ([]*account, error) {
 		// get cash amount with account id
 		err = db.QueryRow("SELECT amount FROM cash WHERE account_id = ?", account.Id).Scan(&account.Cash)
 		if err != nil {
+			return nil, fmt.Errorf("failed to fetch cash: %v", err)
+		}
+		// get investments with account id
+		investmentQuery := `SELECT id, account_id, investment_name, category, amount FROM investments WHERE account_id = ?`
+		rows, err := db.Query(investmentQuery, account.Id)
+		if err != nil {
 			if err == sql.ErrNoRows {
 				account.Investments = []investment{} // Initialize empty array
 				accounts = append(accounts, account) // Add account to the list
 				continue                             // No investments found, continue to next account
 			}
-			return nil, fmt.Errorf("failed to fetch cash: %v", err)
-		}
-		// get investments with account id
-		investmentQuery := `SELECT investment_name, category, amount FROM investments WHERE account_id = ?`
-		rows, err := db.Query(investmentQuery, account.Id)
-		if err != nil {
 			return nil, fmt.Errorf("failed to fetch investments: %v", err)
 		}
 		defer rows.Close()
 		for rows.Next() {
 			investment := investment{}
-			err := rows.Scan(&investment.Name, &investment.Category, &investment.Amount)
+			err := rows.Scan(&investment.Id, &investment.AccountId, &investment.Name, &investment.Category, &investment.Amount)
 			if err != nil {
 				return nil, fmt.Errorf("failed to scan investment: %v", err)
 			}
