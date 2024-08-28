@@ -84,6 +84,14 @@ func UpdateInvestment(investments []*investment) error {
 	return nil
 }
 
+func DeleteInvestment(investmentId int64) error {
+	if db == nil {
+		return fmt.Errorf("database connection is not initialized")
+	}
+	_, err := db.Exec("DELETE FROM investments WHERE id = ?", investmentId)
+	return err
+}
+
 type investment struct {
 	Id        int64   `json:"id"`
 	AccountId int64   `json:"account_id"`

@@ -6,6 +6,8 @@ export function AddAccount(arg1:number,arg2:string,arg3:string):Promise<number>;
 
 export function AddUser(arg1:string):Promise<number>;
 
+export function DeleteInvestment(arg1:number):Promise<void>;
+
 export function FetchAccountDetails(arg1:number):Promise<Array<main.account>>;
 
 export function UpdateCash(arg1:number,arg2:number):Promise<void>;

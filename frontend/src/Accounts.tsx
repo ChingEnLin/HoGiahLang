@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Container, Grid, Typography, Paper, List, ListItem, ListItemText, Switch, FormControlLabel, IconButton, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField } from '@mui/material';
+import { Button, Container, Grid, Typography, Paper, List, ListItem, ListItemText, Switch, FormControlLabel, IconButton, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Menu, MenuItem, TextField } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
-import {AddAccount, FetchAccountDetails, UpdateCash, UpdateInvestment} from "../wailsjs/go/main/App";
+import {AddAccount, FetchAccountDetails, UpdateCash, UpdateInvestment, DeleteInvestment} from "../wailsjs/go/main/App";
 
 type Investment = {
   id: number;
@@ -26,6 +27,7 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'
 const BankingInvestmentPage = () => {
     const [accounts, setAccounts] = useState<Account[]>([]);
     const [selectedAccountId, setSelectedAccountId] = useState(0);
+    const [selectedInvestmentId, setSelectedInvestmentId] = useState<number | null>(null);
     const [showOverallData, setShowOverallData] = useState(false);
     const [openAddAccount, setOpenAddAccount] = useState(false);
     const [openEditAccount, setOpenEditAccount] = useState(false);
@@ -33,6 +35,8 @@ const BankingInvestmentPage = () => {
     const [newAccountHolder, setNewAccountHolder] = useState('');
     const [editedCash, setEditedCash] = useState(0);
     const [editedInvestments, setEditedInvestments] = useState<Investment[]>([]);
+    const [mouseX, setMouseX] = useState<number | null>(null);
+    const [mouseY, setMouseY] = useState<number | null>(null);
 
     const fetchAccount = () => {
         FetchAccountDetails(1)
@@ -108,6 +112,9 @@ const BankingInvestmentPage = () => {
     // Function to close the edit account dialog
     const handleCloseEditAccount = () => {
         setOpenEditAccount(false);
+        setSelectedInvestmentId(null);
+        setMouseX(null);
+        setMouseY(null);
     };
 
     // Function to handle saving the edited account details
@@ -116,6 +123,26 @@ const BankingInvestmentPage = () => {
         console.log('Edited Investments:', editedInvestments);
         UpdateInvestment(editedInvestments);
         setOpenEditAccount(false);
+    };
+
+    const handleContextMenu = (event: React.MouseEvent, id: number) => {
+        event.preventDefault();
+        setMouseX(event.clientX - 2);  // Adjust slightly to position menu correctly
+        setMouseY(event.clientY - 4);
+        setSelectedInvestmentId(id);
+    };
+
+    const handleMenuClose = () => {
+        setMouseX(null);
+        setMouseY(null);
+        setSelectedInvestmentId(null);
+    };
+
+    const handleDeleteInvestment = (investmentId: number) => {
+        DeleteInvestment(investmentId);
+        // Remove the deleted investment from the editedInvestments state
+        setEditedInvestments(editedInvestments.filter(investment => investment.id !== investmentId));
+        handleMenuClose();
     };
 
     return (
@@ -311,6 +338,7 @@ const BankingInvestmentPage = () => {
                         width: '300px', // Fixed width for consistency
                     }}
                     elevation={3}
+                    onContextMenu={(e) => handleContextMenu(e, investment.id)}
                 >
                     <TextField
                         margin="dense"
@@ -364,6 +392,22 @@ const BankingInvestmentPage = () => {
             </Button>
             </DialogActions>
         </Dialog>
+
+        {/* Custom Context Menu */}
+        <Menu
+            open={mouseY !== null}
+            onClose={handleMenuClose}
+            anchorReference="anchorPosition"
+            anchorPosition={
+                mouseY !== null && mouseX !== null
+                    ? { top: mouseY, left: mouseX }
+                    : undefined
+            }
+        >
+            <MenuItem onClick={() => handleDeleteInvestment(selectedInvestmentId!)}>
+                Delete Investment
+            </MenuItem>
+        </Menu>
         </Container>
     );
     };

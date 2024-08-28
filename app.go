@@ -36,6 +36,10 @@ func (a *App) UpdateInvestment(investments []*investment) error {
 	return UpdateInvestment(investments)
 }
 
+func (a *App) DeleteInvestment(investmentId int64) error {
+	return DeleteInvestment(investmentId)
+}
+
 func (a *App) FetchAccountDetails(accountId int64) ([]*account, error) {
 	return GetAccountDetails(accountId)
 }
