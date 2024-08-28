@@ -22,6 +22,7 @@ func InitDB() {
 		CREATE TABLE IF NOT EXISTS accounts (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, account_name STRING, holder_name STRING);
 		CREATE TABLE IF NOT EXISTS cash (id INTEGER PRIMARY KEY AUTOINCREMENT, account_id INTEGER, amount FLOAT);
 		CREATE TABLE IF NOT EXISTS investments (id INTEGER PRIMARY KEY AUTOINCREMENT, account_id INTEGER, investment_name STRING, category STRING, amount FLOAT);
+		CREATE TABLE IF NOT EXISTS categories (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, category STRING);
 	`
 	_, err = db.Exec(sqlStmt)
 	if err != nil {
@@ -153,4 +154,35 @@ func GetAccountDetails(userId int64) ([]*account, error) {
 		accounts = append(accounts, account)
 	}
 	return accounts, nil
+}
+
+type categories []string
+
+func GetCategories(userId int64) (categories, error) {
+	if db == nil {
+		return nil, fmt.Errorf("database connection is not initialized")
+	}
+	rows, err := db.Query("SELECT category FROM categories WHERE user_id = ?", userId)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch categories: %v", err)
+	}
+	defer rows.Close()
+	var cats categories
+	for rows.Next() {
+		var cat string
+		err := rows.Scan(&cat)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan category: %v", err)
+		}
+		cats = append(cats, cat)
+	}
+	return cats, nil
+}
+
+func AddCategory(userId int64, category string) error {
+	if db == nil {
+		return fmt.Errorf("database connection is not initialized")
+	}
+	_, err := db.Exec("INSERT INTO categories (user_id, category) VALUES (?, ?)", userId, category)
+	return err
 }

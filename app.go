@@ -43,3 +43,11 @@ func (a *App) DeleteInvestment(investmentId int64) error {
 func (a *App) FetchAccountDetails(accountId int64) ([]*account, error) {
 	return GetAccountDetails(accountId)
 }
+
+func (a *App) FetchCategories(userId int64) (categories, error) {
+	return GetCategories(userId)
+}
+
+func (a *App) AddCategory(userId int64, category string) error {
+	return AddCategory(userId, category)
+}

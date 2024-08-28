@@ -5,7 +5,7 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
-import {AddAccount, FetchAccountDetails, UpdateCash, UpdateInvestment, DeleteInvestment} from "../wailsjs/go/main/App";
+import {AddAccount, FetchAccountDetails, UpdateCash, UpdateInvestment, DeleteInvestment, FetchCategories, AddCategory} from "../wailsjs/go/main/App";
 
 type Investment = {
   id: number;
@@ -35,12 +35,13 @@ const BankingInvestmentPage = () => {
     const [newAccountHolder, setNewAccountHolder] = useState('');
     const [editedCash, setEditedCash] = useState(0);
     const [editedInvestments, setEditedInvestments] = useState<Investment[]>([]);
-    const [categories, setCategories] = useState<string[]>(['Stocks', 'ETFs', 'Bonds', 'Real Estate', 'Commodities']);
+    const [categories, setCategories] = useState<string[]>([]);
     const [mouseX, setMouseX] = useState<number | null>(null);
     const [mouseY, setMouseY] = useState<number | null>(null);
+    const user = 1;
 
     const fetchAccount = () => {
-        FetchAccountDetails(1)
+        FetchAccountDetails(user)
             .then(response => {
                 setAccounts(response);
             })
@@ -51,6 +52,19 @@ const BankingInvestmentPage = () => {
     useEffect(() => {
         fetchAccount();
     }, [openAddAccount, openEditAccount]);
+
+    const fetchCategories = () => {
+        FetchCategories(user)
+            .then(response => {
+                setCategories(response);
+            })
+            .catch(error => {
+                console.error("error getting backend", error);
+            });
+    };
+    useEffect(() => {
+        fetchCategories();
+    }, [editedInvestments]);
     const selectedAccount = accounts.find(account => account.id === selectedAccountId);
     const totalWealth = selectedAccount?.investments?.reduce((sum, investment) => sum + investment.amount, 0) ?? 0;
 
@@ -121,7 +135,6 @@ const BankingInvestmentPage = () => {
     // Function to handle saving the edited account details
     const handleSaveAccount = () => {
         UpdateCash(selectedAccountId, editedCash);
-        console.log('Edited Investments:', editedInvestments);
         UpdateInvestment(editedInvestments);
         setOpenEditAccount(false);
     };
@@ -148,6 +161,7 @@ const BankingInvestmentPage = () => {
 
     const handleAddCategory = (newCategory: string) => {
         setCategories((prevCategories) => [...prevCategories, newCategory]);
+        AddCategory(user, newCategory);
     };
 
     return (
@@ -376,6 +390,9 @@ const BankingInvestmentPage = () => {
                                 onBlur={(e) => {
                                     const value = e.target.value;
                                     if (!categories.includes(value)) {
+                                        const newInvestments = [...editedInvestments];
+                                        newInvestments[index].category = value;
+                                        setEditedInvestments(newInvestments);
                                         handleAddCategory(value);
                                     }
                                 }}
