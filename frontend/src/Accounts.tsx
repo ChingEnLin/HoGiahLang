@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Container, Grid, Typography, Paper, List, ListItem, ListItemText, Switch, FormControlLabel, IconButton, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Menu, MenuItem, TextField } from '@mui/material';
+import { Autocomplete, Button, Container, Grid, Typography, Paper, List, ListItem, ListItemText, Switch, FormControlLabel, IconButton, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Menu, MenuItem, TextField } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
@@ -35,6 +35,7 @@ const BankingInvestmentPage = () => {
     const [newAccountHolder, setNewAccountHolder] = useState('');
     const [editedCash, setEditedCash] = useState(0);
     const [editedInvestments, setEditedInvestments] = useState<Investment[]>([]);
+    const [categories, setCategories] = useState<string[]>(['Stocks', 'ETFs', 'Bonds', 'Real Estate', 'Commodities']);
     const [mouseX, setMouseX] = useState<number | null>(null);
     const [mouseY, setMouseY] = useState<number | null>(null);
 
@@ -143,6 +144,10 @@ const BankingInvestmentPage = () => {
         // Remove the deleted investment from the editedInvestments state
         setEditedInvestments(editedInvestments.filter(investment => investment.id !== investmentId));
         handleMenuClose();
+    };
+
+    const handleAddCategory = (newCategory: string) => {
+        setCategories((prevCategories) => [...prevCategories, newCategory]);
     };
 
     return (
@@ -351,16 +356,32 @@ const BankingInvestmentPage = () => {
                         setEditedInvestments(newInvestments);
                         }}
                     />
-                    <TextField
-                        margin="dense"
-                        label="Category"
-                        fullWidth
+                    <Autocomplete
+                        freeSolo
                         value={investment.category}
-                        onChange={(e) => {
-                        const newInvestments = [...editedInvestments];
-                        newInvestments[index].category = e.target.value;
-                        setEditedInvestments(newInvestments);
+                        onChange={(e, newValue) => {
+                            const newInvestments = [...editedInvestments];
+                            if (typeof newValue === 'string') {
+                                newInvestments[index].category = newValue;
+                                setEditedInvestments(newInvestments);
+                            }
                         }}
+                        options={categories}
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                label="Category"
+                                margin="normal"
+                                fullWidth
+                                onBlur={(e) => {
+                                    const value = e.target.value;
+                                    if (!categories.includes(value)) {
+                                        handleAddCategory(value);
+                                    }
+                                }}
+                            />
+                        )}
+                        fullWidth
                     />
                     <TextField
                         margin="dense"
