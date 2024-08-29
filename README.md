@@ -1,7 +1,8 @@
 # 🔧 Work in progress
 # HoGiahLang: The Accounting App
 
-This is a minimal accounting desktop application built with [Wails](https://wails.io/), [React](https://reactjs.org/), and [TypeScript](https://www.typescriptlang.org/). The application allows users to input and save their total assets locally using an SQLite database. 
+This is a minimal accounting desktop application built with [Wails](https://wails.io/).
+The application allows users to save and have an overview of their asset distributions.
 
 Aim to provide a simple accounting application that can be used to track assets and liabilities. Ultimately, help everyone to become **hó-gia̍h-lâng**, Taiwanese for rich people 💰.
 
@@ -69,20 +70,23 @@ This command will generate the executable in the `build/bin` directory.
   - `main.go`: Application entry point and Wails bindings.
 - **frontend/**: Contains the React frontend code.
   - `src/`: The source code for the React app.
-    - `App.tsx`: Main React component.
+    - `Account.tsx`: Main component for the application.
     - `wails.d.ts`: TypeScript definitions for Wails.
   - `public/`: Static assets.
 - **build/**: Output directory for the built application.
 - **wails.json**: Wails project configuration.
 
-## Usage
+## Techstack
 
-1. **Save an Asset:**
-   - Enter the total asset amount in the input field and click "Save."
-   - The amount will be stored in the local SQLite database.
+- [Wails](https://wails.io/): A framework for building desktop applications using Go and Web technologies.
+- [TypeScript](https://www.typescriptlang.org/): A typed superset of JavaScript that compiles to plain JavaScript.
+- [React](https://reactjs.org/): A JavaScript library for building user interfaces.
+- [SQLite](https://sqlite.org/index.html): A lightweight database engine.
+- [Go](https://golang.org/): A statically typed, compiled programming language.
 
-2. **Retrieve the Latest Saved Asset:**
-   - The application will automatically display the latest saved asset on startup.
+## Screenshots
+
+![Screenshot](pic/screenshot.png)
 
 ## Contributing
 
