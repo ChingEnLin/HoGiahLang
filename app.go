@@ -28,6 +28,10 @@ func (a *App) AddAccount(userId int64, accountName string, holderName string) (i
 	return AddAccount(userId, accountName, holderName)
 }
 
+func (a *App) DeleteAccount(accountId int64) error {
+	return DeleteAccount(accountId)
+}
+
 func (a *App) UpdateCash(accountId int64, amount float64) error {
 	return UpdateCash(accountId, amount)
 }

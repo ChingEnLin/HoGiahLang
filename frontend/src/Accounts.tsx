@@ -5,7 +5,7 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
-import {AddAccount, FetchAccountDetails, UpdateCash, UpdateInvestment, DeleteInvestment, FetchCategories, AddCategory} from "../wailsjs/go/main/App";
+import {AddAccount, DeleteAccount, FetchAccountDetails, UpdateCash, UpdateInvestment, DeleteInvestment, FetchCategories, AddCategory} from "../wailsjs/go/main/App";
 
 type Investment = {
   id: number;
@@ -26,13 +26,14 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'
 
 const BankingInvestmentPage = () => {
     const [accounts, setAccounts] = useState<Account[]>([]);
-    const [selectedAccountId, setSelectedAccountId] = useState(0);
+    const [selectedAccountId, setSelectedAccountId] = useState(accounts[0]?.id ?? null);
     const [selectedInvestmentId, setSelectedInvestmentId] = useState<number | null>(null);
-    const [showOverallData, setShowOverallData] = useState(false);
+    const [showOverallData, setShowOverallData] = useState(true);
     const [openAddAccount, setOpenAddAccount] = useState(false);
     const [openEditAccount, setOpenEditAccount] = useState(false);
     const [newAccountName, setNewAccountName] = useState('');
     const [newAccountHolder, setNewAccountHolder] = useState('');
+    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [editedCash, setEditedCash] = useState(0);
     const [editedInvestments, setEditedInvestments] = useState<Investment[]>([]);
     const [categories, setCategories] = useState<string[]>([]);
@@ -139,6 +140,28 @@ const BankingInvestmentPage = () => {
         setOpenEditAccount(false);
     };
 
+    // Function to handle the opening of the context menu for deleting an account
+    const handleDeleteAccountMenuClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    // Function to handle the closing of the context menu
+    const handleDeleteAccountMenuClose = () => {
+        setAnchorEl(null);
+    }
+
+    // Function to delete an account
+    const handleDeleteAccount = (accountId: number) => {
+        // Delete the account
+        // Remove the account from the list of accounts
+        // Set the selected account to null
+        setAccounts(accounts.filter(account => account.id !== accountId));
+        setSelectedAccountId(accounts[0]?.id ?? null);
+        setAnchorEl(null);
+        DeleteAccount(accountId);
+    }
+
+    // Function to handle the opening of the context menu for deleting an investment
     const handleContextMenu = (event: React.MouseEvent, id: number) => {
         event.preventDefault();
         setMouseX(event.clientX - 2);  // Adjust slightly to position menu correctly
@@ -146,12 +169,14 @@ const BankingInvestmentPage = () => {
         setSelectedInvestmentId(id);
     };
 
+    // Function to handle the closing of the context menu
     const handleMenuClose = () => {
         setMouseX(null);
         setMouseY(null);
         setSelectedInvestmentId(null);
     };
 
+    // Function to handle the click event for the context menu
     const handleDeleteInvestment = (investmentId: number) => {
         DeleteInvestment(investmentId);
         // Remove the deleted investment from the editedInvestments state
@@ -159,6 +184,7 @@ const BankingInvestmentPage = () => {
         handleMenuClose();
     };
 
+    // Function to add a new category to the list of categories
     const handleAddCategory = (newCategory: string) => {
         setCategories((prevCategories) => [...prevCategories, newCategory]);
         AddCategory(user, newCategory);
@@ -185,22 +211,32 @@ const BankingInvestmentPage = () => {
                 <List>
                 {accounts.map(account => (
                     <ListItem
-                    button
-                    key={account.id}
-                    selected={account.id === selectedAccountId}
-                    onClick={() => setSelectedAccountId(account.id)}
+                        button
+                        key={account.id}
+                        selected={account.id === selectedAccountId}
+                        onClick={() => setSelectedAccountId(account.id)}
                     >
-                    <ListItemText
-                        primary={`${account.name}`}
-                        secondary={
-                            <>
+                        <ListItemText
+                            primary={`${account.name}`}
+                            secondary={<>
                                 <Typography component="span" variant="body2" color="textPrimary">
                                     {account.holder}
                                 </Typography>
                                 {` - ${account.cash + (account.investments?.reduce((sum, investment) => sum + investment.amount, 0) ?? 0)} $`}
-                            </>
-                        }
-                    />
+                            </>} />
+                            <IconButton
+                                style={{ position: 'absolute', top: '8px', right: '36px' }}
+                                onClick={(e) => handleDeleteAccountMenuClick(e)}
+                            >
+                                    <MoreVertIcon />
+                                </IconButton>
+                                <Menu
+                                    anchorEl={anchorEl}
+                                    open={Boolean(anchorEl)}
+                                    onClose={handleDeleteAccountMenuClose}
+                                >
+                                    <MenuItem onClick={() => handleDeleteAccount(account.id)}>Delete account</MenuItem>
+                                </Menu>
                     </ListItem>
                 ))}
                 </List>

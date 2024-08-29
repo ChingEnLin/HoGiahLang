@@ -30,6 +30,21 @@ func InitDB() {
 	}
 }
 
+type investment struct {
+	Id        int64   `json:"id"`
+	AccountId int64   `json:"account_id"`
+	Name      string  `json:"name"`
+	Category  string  `json:"category"`
+	Amount    float64 `json:"amount"`
+}
+type account struct {
+	Id          int64        `json:"id"`
+	Name        string       `json:"name"`
+	Holder      string       `json:"holder"`
+	Cash        float64      `json:"cash"`
+	Investments []investment `json:"investments"`
+}
+
 func AddUser(userName string) (int64, error) {
 	if db == nil {
 		return 0, fmt.Errorf("database connection is not initialized")
@@ -50,6 +65,22 @@ func AddAccount(userId int64, accountName string, holderName string) (int64, err
 		return 0, err
 	}
 	return res.LastInsertId()
+}
+
+func DeleteAccount(accountId int64) error {
+	if db == nil {
+		return fmt.Errorf("database connection is not initialized")
+	}
+	_, err := db.Exec("DELETE FROM accounts WHERE id = ?", accountId)
+	if err != nil {
+		return err
+	}
+	_, err = db.Exec("DELETE FROM cash WHERE account_id = ?", accountId)
+	if err != nil {
+		return err
+	}
+	_, err = db.Exec("DELETE FROM investments WHERE account_id = ?", accountId)
+	return err
 }
 
 func UpdateCash(accountId int64, amount float64) error {
@@ -91,21 +122,6 @@ func DeleteInvestment(investmentId int64) error {
 	}
 	_, err := db.Exec("DELETE FROM investments WHERE id = ?", investmentId)
 	return err
-}
-
-type investment struct {
-	Id        int64   `json:"id"`
-	AccountId int64   `json:"account_id"`
-	Name      string  `json:"name"`
-	Category  string  `json:"category"`
-	Amount    float64 `json:"amount"`
-}
-type account struct {
-	Id          int64        `json:"id"`
-	Name        string       `json:"name"`
-	Holder      string       `json:"holder"`
-	Cash        float64      `json:"cash"`
-	Investments []investment `json:"investments"`
 }
 
 func GetAccountDetails(userId int64) ([]*account, error) {

@@ -8,6 +8,8 @@ export function AddCategory(arg1:number,arg2:string):Promise<void>;
 
 export function AddUser(arg1:string):Promise<number>;
 
+export function DeleteAccount(arg1:number):Promise<void>;
+
 export function DeleteInvestment(arg1:number):Promise<void>;
 
 export function FetchAccountDetails(arg1:number):Promise<Array<main.account>>;

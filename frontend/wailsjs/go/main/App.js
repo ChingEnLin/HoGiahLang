@@ -14,6 +14,10 @@ export function AddUser(arg1) {
   return window['go']['main']['App']['AddUser'](arg1);
 }
 
+export function DeleteAccount(arg1) {
+  return window['go']['main']['App']['DeleteAccount'](arg1);
+}
+
 export function DeleteInvestment(arg1) {
   return window['go']['main']['App']['DeleteInvestment'](arg1);
 }
