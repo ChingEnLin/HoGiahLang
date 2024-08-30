@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Autocomplete, Button, Container, Grid, Typography, Paper, List, ListItem, ListItemText, Switch, FormControlLabel, IconButton, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Menu, MenuItem, TextField } from '@mui/material';
+import { Autocomplete, Box, Button, Container, FormControl, InputLabel, OutlinedInput, InputAdornment, Grid, Typography, Paper, List, ListItem, ListItemText, Switch, FormControlLabel, IconButton, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Menu, MenuItem, TextField } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
@@ -23,6 +23,28 @@ type Account = {
 };
  
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'];
+const currencies = [
+    {
+      value: 'EUR',
+      label: '€',
+    },
+    {
+      value: 'USD',
+      label: '$',
+    },
+    {
+      value: 'NTD',
+      label: 'NT$',
+    },
+    {
+      value: 'JPY',
+      label: '¥',
+    },
+  ];
+const getCurrencyLabel = (currencyValue: string): string | undefined => {
+    const currency = currencies.find(c => c.value === currencyValue);
+    return currency ? currency.label : undefined;
+};
 
 const BankingInvestmentPage = () => {
     const [accounts, setAccounts] = useState<Account[]>([]);
@@ -395,59 +417,76 @@ const BankingInvestmentPage = () => {
                     elevation={3}
                     onContextMenu={(e) => handleContextMenu(e, investment.id)}
                 >
-                    <TextField
-                        margin="dense"
-                        label="Investment Name"
-                        fullWidth
-                        value={investment.name}
-                        onChange={(e) => {
-                        const newInvestments = [...editedInvestments];
-                        newInvestments[index].name = e.target.value;
-                        setEditedInvestments(newInvestments);
-                        }}
-                    />
-                    <Autocomplete
-                        freeSolo
-                        value={investment.category}
-                        onChange={(e, newValue) => {
-                            const newInvestments = [...editedInvestments];
-                            if (typeof newValue === 'string') {
-                                newInvestments[index].category = newValue;
-                                setEditedInvestments(newInvestments);
-                            }
-                        }}
-                        options={categories}
-                        renderInput={(params) => (
+                    <Box sx={{ display: 'grid', flexWrap: 'wrap' }}>
+                        <div>
                             <TextField
-                                {...params}
-                                label="Category"
-                                margin="normal"
+                                margin="dense"
+                                label="Investment Name"
                                 fullWidth
-                                onBlur={(e) => {
-                                    const value = e.target.value;
-                                    if (!categories.includes(value)) {
-                                        const newInvestments = [...editedInvestments];
-                                        newInvestments[index].category = value;
-                                        setEditedInvestments(newInvestments);
-                                        handleAddCategory(value);
-                                    }
+                                value={investment.name}
+                                onChange={(e) => {
+                                const newInvestments = [...editedInvestments];
+                                newInvestments[index].name = e.target.value;
+                                setEditedInvestments(newInvestments);
                                 }}
                             />
-                        )}
-                        fullWidth
-                    />
-                    <TextField
-                        margin="dense"
-                        label="Amount"
-                        type="number"
-                        fullWidth
-                        value={investment.amount}
-                        onChange={(e) => {
-                        const newInvestments = [...editedInvestments];
-                        newInvestments[index].amount = Number(e.target.value);
-                        setEditedInvestments(newInvestments);
-                        }}
-                    />
+                            <Autocomplete
+                                style={{ width: '100%', marginBottom: '14px' }}
+                                freeSolo
+                                value={investment.category}
+                                onChange={(e, newValue) => {
+                                    const newInvestments = [...editedInvestments];
+                                    if (typeof newValue === 'string') {
+                                        newInvestments[index].category = newValue;
+                                        setEditedInvestments(newInvestments);
+                                    }
+                                }}
+                                options={categories}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        label="Category"
+                                        margin="normal"
+                                        fullWidth
+                                        onBlur={(e) => {
+                                            const value = e.target.value;
+                                            if (!categories.includes(value)) {
+                                                const newInvestments = [...editedInvestments];
+                                                newInvestments[index].category = value;
+                                                setEditedInvestments(newInvestments);
+                                                handleAddCategory(value);
+                                            }
+                                        }}
+                                    />
+                                )}
+                                fullWidth
+                            />
+                            <TextField
+                                label="Amount"
+                                type="number"
+                                style={{ width: '75%', margin: "normal"}}
+                                value={investment.amount}
+                                onChange={(e) => {
+                                const newInvestments = [...editedInvestments];
+                                newInvestments[index].amount = Number(e.target.value);
+                                setEditedInvestments(newInvestments);
+                                }}
+                            />
+                            <TextField 
+                                id="outlined-select-currency"
+                                select
+                                label="Select"
+                                defaultValue="EUR"
+                                style={{ width: '25%' }}
+                                >
+                                {currencies.map((option) => (
+                                    <MenuItem key={option.value} value={option.value}>
+                                    {option.label}
+                                    </MenuItem>
+                                ))}
+                            </TextField>
+                        </div>
+                    </Box>
                 </Paper>
             ))}
             <Button
