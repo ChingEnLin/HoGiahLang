@@ -21,7 +21,7 @@ func InitDB() {
 		CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, user_name STRING);
 		CREATE TABLE IF NOT EXISTS accounts (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, account_name STRING, holder_name STRING);
 		CREATE TABLE IF NOT EXISTS cash (id INTEGER PRIMARY KEY AUTOINCREMENT, account_id INTEGER, amount FLOAT);
-		CREATE TABLE IF NOT EXISTS investments (id INTEGER PRIMARY KEY AUTOINCREMENT, account_id INTEGER, investment_name STRING, category STRING, amount FLOAT);
+		CREATE TABLE IF NOT EXISTS investments (id INTEGER PRIMARY KEY AUTOINCREMENT, account_id INTEGER, investment_name STRING, category STRING, amount FLOAT, currency STRING);
 		CREATE TABLE IF NOT EXISTS categories (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, category STRING);
 	`
 	_, err = db.Exec(sqlStmt)
@@ -36,6 +36,7 @@ type investment struct {
 	Name      string  `json:"name"`
 	Category  string  `json:"category"`
 	Amount    float64 `json:"amount"`
+	Currency  string  `json:"currency"`
 }
 type account struct {
 	Id          int64        `json:"id"`
@@ -100,14 +101,14 @@ func UpdateInvestment(investments []*investment) error {
 	// Update investments based on id, if id is null, insert new investment
 	for _, inv := range investments {
 		if inv.Id == 0 {
-			_, err := db.Exec("INSERT INTO investments (account_id, investment_name, category, amount) VALUES (?, ?, ?, ?)",
-				inv.AccountId, inv.Name, inv.Category, inv.Amount)
+			_, err := db.Exec("INSERT INTO investments (account_id, investment_name, category, amount, currency) VALUES (?, ?, ?, ?, ?)",
+				inv.AccountId, inv.Name, inv.Category, inv.Amount, inv.Currency)
 			if err != nil {
 				return err
 			}
 		} else {
-			_, err := db.Exec("UPDATE investments SET investment_name = ?, category = ?, amount = ? WHERE id = ?",
-				inv.Name, inv.Category, inv.Amount, inv.Id)
+			_, err := db.Exec("UPDATE investments SET investment_name = ?, category = ?, amount = ?, currency = ? WHERE id = ?",
+				inv.Name, inv.Category, inv.Amount, inv.Currency, inv.Id)
 			if err != nil {
 				return err
 			}
@@ -148,7 +149,7 @@ func GetAccountDetails(userId int64) ([]*account, error) {
 			return nil, fmt.Errorf("failed to fetch cash: %v", err)
 		}
 		// get investments with account id
-		investmentQuery := `SELECT id, account_id, investment_name, category, amount FROM investments WHERE account_id = ?`
+		investmentQuery := `SELECT id, account_id, investment_name, category, amount, currency FROM investments WHERE account_id = ?`
 		rows, err := db.Query(investmentQuery, account.Id)
 		if err != nil {
 			if err == sql.ErrNoRows {
@@ -161,7 +162,7 @@ func GetAccountDetails(userId int64) ([]*account, error) {
 		defer rows.Close()
 		for rows.Next() {
 			investment := investment{}
-			err := rows.Scan(&investment.Id, &investment.AccountId, &investment.Name, &investment.Category, &investment.Amount)
+			err := rows.Scan(&investment.Id, &investment.AccountId, &investment.Name, &investment.Category, &investment.Amount, &investment.Currency)
 			if err != nil {
 				return nil, fmt.Errorf("failed to scan investment: %v", err)
 			}

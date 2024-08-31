@@ -13,6 +13,7 @@ type Investment = {
   name: string;
   category: string;
   amount: number;
+  currency: string;
 };
 type Account = {
   id: number;
@@ -41,6 +42,14 @@ const currencies = [
       label: '¥',
     },
   ];
+const defaultInvestment: Investment = {
+    id: 0,
+    account_id: 0,
+    name: '',
+    category: '',
+    amount: 0,
+    currency: 'EUR',
+};
 const getCurrencyLabel = (currencyValue: string): string | undefined => {
     const currency = currencies.find(c => c.value === currencyValue);
     return currency ? currency.label : undefined;
@@ -66,6 +75,7 @@ const BankingInvestmentPage = () => {
     const fetchAccount = () => {
         FetchAccountDetails(user)
             .then(response => {
+                console.log("get account response", response);
                 setAccounts(response);
             })
             .catch(error => {
@@ -351,7 +361,7 @@ const BankingInvestmentPage = () => {
                                     <Typography component="span" variant="body2" color="textPrimary">
                                         {investment.category}
                                     </Typography>
-                                    {` - ${`USD ${investment.amount} $`}`}
+                                    {` - ${`${investment.currency} ${investment.amount} ${getCurrencyLabel(investment.currency)}`}`}
                                 </>
                             }
                         />
@@ -467,17 +477,22 @@ const BankingInvestmentPage = () => {
                                 style={{ width: '75%', margin: "normal"}}
                                 value={investment.amount}
                                 onChange={(e) => {
-                                const newInvestments = [...editedInvestments];
-                                newInvestments[index].amount = Number(e.target.value);
-                                setEditedInvestments(newInvestments);
+                                    const newInvestments = [...editedInvestments];
+                                    newInvestments[index].amount = Number(e.target.value);
+                                    setEditedInvestments(newInvestments);
                                 }}
                             />
                             <TextField 
                                 id="outlined-select-currency"
                                 select
                                 label="Select"
-                                defaultValue="EUR"
+                                value={investment.currency}
                                 style={{ width: '25%' }}
+                                onChange={(e) => {
+                                    const newInvestments = [...editedInvestments];
+                                    newInvestments[index].currency = e.target.value;
+                                    setEditedInvestments(newInvestments);
+                                }}
                                 >
                                 {currencies.map((option) => (
                                     <MenuItem key={option.value} value={option.value}>
@@ -490,7 +505,7 @@ const BankingInvestmentPage = () => {
                 </Paper>
             ))}
             <Button
-                onClick={() => setEditedInvestments([...editedInvestments, { id: 0, account_id: selectedAccountId, name: '', category: '', amount: 0 }])}
+                onClick={() => setEditedInvestments([...editedInvestments, defaultInvestment])}
                 color="primary"
             >
                 Add Investment

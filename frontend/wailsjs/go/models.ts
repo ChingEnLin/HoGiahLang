@@ -6,6 +6,7 @@ export namespace main {
 	    name: string;
 	    category: string;
 	    amount: number;
+	    currency: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new investment(source);
@@ -18,6 +19,7 @@ export namespace main {
 	        this.name = source["name"];
 	        this.category = source["category"];
 	        this.amount = source["amount"];
+	        this.currency = source["currency"];
 	    }
 	}
 	export class account {
