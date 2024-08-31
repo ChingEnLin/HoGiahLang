@@ -39,11 +39,12 @@ type investment struct {
 	Currency  string  `json:"currency"`
 }
 type account struct {
-	Id          int64        `json:"id"`
-	Name        string       `json:"name"`
-	Holder      string       `json:"holder"`
-	Cash        float64      `json:"cash"`
-	Investments []investment `json:"investments"`
+	Id           int64        `json:"id"`
+	Name         string       `json:"name"`
+	Holder       string       `json:"holder"`
+	Cash         float64      `json:"cash"`
+	CashCurrency string       `json:"cash_currency"`
+	Investments  []investment `json:"investments"`
 }
 
 func AddUser(userName string) (int64, error) {
@@ -84,13 +85,13 @@ func DeleteAccount(accountId int64) error {
 	return err
 }
 
-func UpdateCash(accountId int64, amount float64) error {
+func UpdateCash(accountId int64, amount float64, currency string) error {
 	if db == nil {
 		return fmt.Errorf("database connection is not initialized")
 	}
-	query := `INSERT OR REPLACE INTO cash (id, account_id, amount) 
-	VALUES ((SELECT id FROM cash WHERE account_id = ?), ?, ?)`
-	_, err := db.Exec(query, accountId, accountId, amount)
+	query := `INSERT OR REPLACE INTO cash (id, account_id, amount, currency) 
+	VALUES ((SELECT id FROM cash WHERE account_id = ?), ?, ?, ?)`
+	_, err := db.Exec(query, accountId, accountId, amount, currency)
 	return err
 }
 
@@ -144,7 +145,7 @@ func GetAccountDetails(userId int64) ([]*account, error) {
 			return nil, fmt.Errorf("failed to scan account: %v", err)
 		}
 		// get cash amount with account id
-		err = db.QueryRow("SELECT amount FROM cash WHERE account_id = ?", account.Id).Scan(&account.Cash)
+		err = db.QueryRow("SELECT amount, currency FROM cash WHERE account_id = ?", account.Id).Scan(&account.Cash, &account.CashCurrency)
 		if err != nil {
 			return nil, fmt.Errorf("failed to fetch cash: %v", err)
 		}

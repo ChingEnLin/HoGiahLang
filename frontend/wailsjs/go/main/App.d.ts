@@ -16,6 +16,6 @@ export function FetchAccountDetails(arg1:number):Promise<Array<main.account>>;
 
 export function FetchCategories(arg1:number):Promise<main.categories>;
 
-export function UpdateCash(arg1:number,arg2:number):Promise<void>;
+export function UpdateCash(arg1:number,arg2:number,arg3:string):Promise<void>;
 
 export function UpdateInvestment(arg1:Array<main.investment>):Promise<void>;

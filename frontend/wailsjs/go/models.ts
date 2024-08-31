@@ -27,6 +27,7 @@ export namespace main {
 	    name: string;
 	    holder: string;
 	    cash: number;
+	    cash_currency: string;
 	    investments: investment[];
 	
 	    static createFrom(source: any = {}) {
@@ -39,6 +40,7 @@ export namespace main {
 	        this.name = source["name"];
 	        this.holder = source["holder"];
 	        this.cash = source["cash"];
+	        this.cash_currency = source["cash_currency"];
 	        this.investments = this.convertValues(source["investments"], investment);
 	    }
 	

@@ -32,8 +32,8 @@ func (a *App) DeleteAccount(accountId int64) error {
 	return DeleteAccount(accountId)
 }
 
-func (a *App) UpdateCash(accountId int64, amount float64) error {
-	return UpdateCash(accountId, amount)
+func (a *App) UpdateCash(accountId int64, amount float64, currency string) error {
+	return UpdateCash(accountId, amount, currency)
 }
 
 func (a *App) UpdateInvestment(investments []*investment) error {

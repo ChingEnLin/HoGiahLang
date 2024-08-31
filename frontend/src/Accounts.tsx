@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Autocomplete, Box, Button, Container, FormControl, InputLabel, OutlinedInput, InputAdornment, Grid, Typography, Paper, List, ListItem, ListItemText, Switch, FormControlLabel, IconButton, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Menu, MenuItem, TextField } from '@mui/material';
+import { Autocomplete, Box, Button, Container, Select, OutlinedInput, Grid, Typography, Paper, List, ListItem, ListItemText, Switch, FormControlLabel, IconButton, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Menu, MenuItem, TextField } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import {AddAccount, DeleteAccount, FetchAccountDetails, UpdateCash, UpdateInvestment, DeleteInvestment, FetchCategories, AddCategory} from "../wailsjs/go/main/App";
+import { set } from 'date-fns';
 
 type Investment = {
   id: number;
@@ -20,6 +21,7 @@ type Account = {
   name: string;
   holder: string;
   cash: number;
+  cash_currency: string;
   investments: Investment[];
 };
  
@@ -60,12 +62,15 @@ const BankingInvestmentPage = () => {
     const [selectedAccountId, setSelectedAccountId] = useState(accounts[0]?.id ?? null);
     const [selectedInvestmentId, setSelectedInvestmentId] = useState<number | null>(null);
     const [showOverallData, setShowOverallData] = useState(true);
+    const [openPortfolioCurrency, setOpenPortfolioCurrency] = React.useState(false);
+    const [portfolioCurrency, setPortfolioCurrency] = React.useState<string>(defaultInvestment.currency);
     const [openAddAccount, setOpenAddAccount] = useState(false);
     const [openEditAccount, setOpenEditAccount] = useState(false);
     const [newAccountName, setNewAccountName] = useState('');
     const [newAccountHolder, setNewAccountHolder] = useState('');
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [editedCash, setEditedCash] = useState(0);
+    const [editedCashCurrency, setEditedCashCurrency] = useState(defaultInvestment.currency);
     const [editedInvestments, setEditedInvestments] = useState<Investment[]>([]);
     const [categories, setCategories] = useState<string[]>([]);
     const [mouseX, setMouseX] = useState<number | null>(null);
@@ -167,7 +172,7 @@ const BankingInvestmentPage = () => {
 
     // Function to handle saving the edited account details
     const handleSaveAccount = () => {
-        UpdateCash(selectedAccountId, editedCash);
+        UpdateCash(selectedAccountId, editedCash, editedCashCurrency);
         UpdateInvestment(editedInvestments);
         setOpenEditAccount(false);
     };
@@ -192,6 +197,18 @@ const BankingInvestmentPage = () => {
         setAnchorEl(null);
         DeleteAccount(accountId);
     }
+
+    const handlePortfolioCurrencyChange = (currency: string) => {
+        setPortfolioCurrency(currency);
+      };
+    
+    const handleOpenPortfolioCurrency = () => {
+        setOpenPortfolioCurrency(true);
+    };
+
+    const handleClosePortfolioCurrency = () => {
+        setOpenPortfolioCurrency(false);
+    };
 
     // Function to handle the opening of the context menu for deleting an investment
     const handleContextMenu = (event: React.MouseEvent, id: number) => {
@@ -222,6 +239,33 @@ const BankingInvestmentPage = () => {
         AddCategory(user, newCategory);
     };
 
+    const portfolioCurrencyDialog = () => {
+        return (
+            <div>
+                <Button 
+                    onClick={handleOpenPortfolioCurrency}>{getCurrencyLabel(portfolioCurrency)}</Button>
+                <Dialog open={openPortfolioCurrency} onClose={handleClosePortfolioCurrency}>
+                    <DialogContent>
+                    <Box component="form" sx={{ display: 'flex', flexWrap: 'wrap' }}>
+                        <Select
+                            labelId="portfolioCurrency-dialog-select-label"
+                            id="portfolioCurrency-dialog-select"
+                            value={portfolioCurrency}
+                            onChange={(e) => handlePortfolioCurrencyChange(e.target.value)}
+                            input={<OutlinedInput label={getCurrencyLabel(portfolioCurrency)} />}
+                        >
+                            {currencies.map((option) => (
+                            <MenuItem key={option.value} value={option.value}>
+                                {option.label}
+                            </MenuItem>
+                        ))}
+                        </Select>
+                    </Box>
+                    </DialogContent>
+                </Dialog>
+            </div>
+        )
+    }
     return (
         <Container style={{ marginTop: '20px' }}>
         <Grid container spacing={2}>
@@ -291,6 +335,9 @@ const BankingInvestmentPage = () => {
                         title="Toggle between current account and overall view"
                     />
                 </div>
+                <div style={{ position: 'absolute', top: '0px', left: '0px' }}>
+                    {portfolioCurrencyDialog()}
+                </div>
                 <ResponsiveContainer width="100%" height={200}>
                 <PieChart>
                     <Pie
@@ -313,7 +360,7 @@ const BankingInvestmentPage = () => {
                 <List>
                     {dataToDisplay?.map((data, index) => (
                         <ListItem key={index}>
-                            <ListItemText primary={data.name} secondary={`${data.value} $`} />
+                            <ListItemText primary={data.name} secondary={`${data.value} ${getCurrencyLabel(portfolioCurrency)}`} />
                         </ListItem>
                     ))}
                 </List>
@@ -340,14 +387,13 @@ const BankingInvestmentPage = () => {
                 <Typography variant="h6" style={{ marginTop: '20px' }}>
                 <AccountBalanceWalletIcon /> Cash
                 </Typography>
-                <Typography variant="body1">{`USD ${selectedAccount?.cash ?? 0} $`}</Typography>
+                <Typography variant="body1">{`${selectedAccount?.cash_currency ?? defaultInvestment.currency} ${selectedAccount?.cash ?? 0} ${getCurrencyLabel(selectedAccount?.cash_currency ?? defaultInvestment.currency)}`}</Typography>
 
                 {/* Wealth */}
                 <Typography variant="h6" style={{ marginTop: '20px' }}>
                 <AccountBalanceIcon /> Wealth
                 </Typography>
-                <Typography variant="body1">{`USD ${totalWealth} $`}</Typography>
-
+                <Typography variant="body1" >{`USD ${totalWealth} ${portfolioCurrency}`}</Typography>
                 {/* Investments */}
                 <Typography variant="h6" style={{ marginTop: '20px' }}>
                 Investment
@@ -405,14 +451,42 @@ const BankingInvestmentPage = () => {
         <Dialog open={openEditAccount} onClose={handleCloseEditAccount}>
             <DialogTitle>Edit Account</DialogTitle>
             <DialogContent>
-            <TextField
-                margin="dense"
-                label="Cash"
-                type="number"
-                fullWidth
-                value={editedCash}
-                onChange={(e) => setEditedCash(Number(e.target.value))}
-            />
+            <DialogContentText>Cash</DialogContentText>
+            <Paper
+                key={selectedAccountId}
+                style={{
+                    padding: '16px',
+                    marginBottom: '16px',
+                    backgroundColor: '#f5f5f5',
+                    borderRadius: '8px',
+                    width: '300px',
+                }}
+                elevation={3}
+                >
+                <Box sx={{ display: 'flow', flexWrap: 'wrap' }}>
+                    <TextField
+                        label="Amount"
+                        type="number"
+                        value={editedCash}
+                        style={{ width: '75%', margin: "normal" }}
+                        onChange={(e) => setEditedCash(Number(e.target.value))}
+                    />
+                    <TextField 
+                        id="outlined-select-currency"
+                        select
+                        label="Currency"
+                        value={editedCashCurrency}
+                        style={{ width: '25%' }}
+                        onChange={(e) => setEditedCashCurrency(e.target.value)}
+                        >
+                        {currencies.map((option) => (
+                            <MenuItem key={option.value} value={option.value}>
+                            {option.label}
+                            </MenuItem>
+                        ))}
+                    </TextField>
+                </Box>
+            </Paper>
             <DialogContentText>Investments</DialogContentText>
             {editedInvestments.map((investment, index) => (
                 <Paper
@@ -485,7 +559,7 @@ const BankingInvestmentPage = () => {
                             <TextField 
                                 id="outlined-select-currency"
                                 select
-                                label="Select"
+                                label="Currency"
                                 value={investment.currency}
                                 style={{ width: '25%' }}
                                 onChange={(e) => {
