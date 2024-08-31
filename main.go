@@ -1,6 +1,7 @@
 package main
 
 import (
+	"HoGiahLang/internal/db"
 	"embed"
 
 	"github.com/wailsapp/wails/v2"
@@ -15,7 +16,7 @@ func main() {
 	// Create an instance of the app structure
 	app := NewApp()
 
-	InitDB() // Initialize the database here
+	db.InitDB() // Initialize the database here
 	// Create application with options
 	err := wails.Run(&options.App{
 		Title:  "HoGiahLang",
@@ -25,7 +26,7 @@ func main() {
 			Assets: assets,
 		},
 		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
-		OnStartup:        app.startup,
+		OnStartup:        app.Startup,
 		Bind:             []interface{}{&App{}},
 	})
 

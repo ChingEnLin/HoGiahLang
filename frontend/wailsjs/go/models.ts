@@ -1,6 +1,6 @@
-export namespace main {
+export namespace db {
 	
-	export class investment {
+	export class Investment {
 	    id: number;
 	    account_id: number;
 	    name: string;
@@ -9,7 +9,7 @@ export namespace main {
 	    currency: string;
 	
 	    static createFrom(source: any = {}) {
-	        return new investment(source);
+	        return new Investment(source);
 	    }
 	
 	    constructor(source: any = {}) {
@@ -22,16 +22,16 @@ export namespace main {
 	        this.currency = source["currency"];
 	    }
 	}
-	export class account {
+	export class Account {
 	    id: number;
 	    name: string;
 	    holder: string;
 	    cash: number;
 	    cash_currency: string;
-	    investments: investment[];
+	    investments: Investment[];
 	
 	    static createFrom(source: any = {}) {
-	        return new account(source);
+	        return new Account(source);
 	    }
 	
 	    constructor(source: any = {}) {
@@ -41,7 +41,7 @@ export namespace main {
 	        this.holder = source["holder"];
 	        this.cash = source["cash"];
 	        this.cash_currency = source["cash_currency"];
-	        this.investments = this.convertValues(source["investments"], investment);
+	        this.investments = this.convertValues(source["investments"], Investment);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

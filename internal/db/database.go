@@ -1,4 +1,4 @@
-package main
+package db
 
 import (
 	"database/sql"
@@ -30,7 +30,7 @@ func InitDB() {
 	}
 }
 
-type investment struct {
+type Investment struct {
 	Id        int64   `json:"id"`
 	AccountId int64   `json:"account_id"`
 	Name      string  `json:"name"`
@@ -38,14 +38,16 @@ type investment struct {
 	Amount    float64 `json:"amount"`
 	Currency  string  `json:"currency"`
 }
-type account struct {
+type Account struct {
 	Id           int64        `json:"id"`
 	Name         string       `json:"name"`
 	Holder       string       `json:"holder"`
 	Cash         float64      `json:"cash"`
 	CashCurrency string       `json:"cash_currency"`
-	Investments  []investment `json:"investments"`
+	Investments  []Investment `json:"investments"`
 }
+
+type Categories []string
 
 func AddUser(userName string) (int64, error) {
 	if db == nil {
@@ -95,7 +97,7 @@ func UpdateCash(accountId int64, amount float64, currency string) error {
 	return err
 }
 
-func UpdateInvestment(investments []*investment) error {
+func UpdateInvestment(investments []*Investment) error {
 	if db == nil {
 		return fmt.Errorf("database connection is not initialized")
 	}
@@ -126,7 +128,7 @@ func DeleteInvestment(investmentId int64) error {
 	return err
 }
 
-func GetAccountDetails(userId int64) ([]*account, error) {
+func GetAccountDetails(userId int64) ([]*Account, error) {
 	if db == nil {
 		return nil, fmt.Errorf("database connection is not initialized")
 	}
@@ -137,9 +139,9 @@ func GetAccountDetails(userId int64) ([]*account, error) {
 		return nil, fmt.Errorf("failed to fetch accounts: %v", err)
 	}
 	defer rows.Close()
-	var accounts []*account
+	var accounts []*Account
 	for rows.Next() {
-		account := &account{}
+		account := &Account{}
 		err := rows.Scan(&account.Id, &account.Name, &account.Holder)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan account: %v", err)
@@ -154,7 +156,7 @@ func GetAccountDetails(userId int64) ([]*account, error) {
 		rows, err := db.Query(investmentQuery, account.Id)
 		if err != nil {
 			if err == sql.ErrNoRows {
-				account.Investments = []investment{} // Initialize empty array
+				account.Investments = []Investment{} // Initialize empty array
 				accounts = append(accounts, account) // Add account to the list
 				continue                             // No investments found, continue to next account
 			}
@@ -162,7 +164,7 @@ func GetAccountDetails(userId int64) ([]*account, error) {
 		}
 		defer rows.Close()
 		for rows.Next() {
-			investment := investment{}
+			investment := Investment{}
 			err := rows.Scan(&investment.Id, &investment.AccountId, &investment.Name, &investment.Category, &investment.Amount, &investment.Currency)
 			if err != nil {
 				return nil, fmt.Errorf("failed to scan investment: %v", err)
@@ -174,9 +176,7 @@ func GetAccountDetails(userId int64) ([]*account, error) {
 	return accounts, nil
 }
 
-type categories []string
-
-func GetCategories(userId int64) (categories, error) {
+func GetCategories(userId int64) (Categories, error) {
 	if db == nil {
 		return nil, fmt.Errorf("database connection is not initialized")
 	}
@@ -185,7 +185,7 @@ func GetCategories(userId int64) (categories, error) {
 		return nil, fmt.Errorf("failed to fetch categories: %v", err)
 	}
 	defer rows.Close()
-	var cats categories
+	var cats Categories
 	for rows.Next() {
 		var cat string
 		err := rows.Scan(&cat)
