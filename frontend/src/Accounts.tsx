@@ -5,7 +5,7 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
-import {AddAccount, DeleteAccount, FetchAccountDetails, UpdateCash, UpdateInvestment, DeleteInvestment, FetchCategories, AddCategory} from "../wailsjs/go/main/App";
+import {AddAccount, DeleteAccount, FetchAccountDetails, UpdateCash, UpdateInvestment, DeleteInvestment, FetchCategories, AddCategory, GetExchangeRates} from "../wailsjs/go/main/App";
 import { set } from 'date-fns';
 
 type Investment = {
@@ -36,7 +36,7 @@ const currencies = [
       label: '$',
     },
     {
-      value: 'NTD',
+      value: 'TWD',
       label: 'NT$',
     },
     {
@@ -64,6 +64,7 @@ const BankingInvestmentPage = () => {
     const [showOverallData, setShowOverallData] = useState(true);
     const [openPortfolioCurrency, setOpenPortfolioCurrency] = React.useState(false);
     const [portfolioCurrency, setPortfolioCurrency] = React.useState<string>(defaultInvestment.currency);
+    const [exchangeRate, setExchangeRate] = React.useState<Record<string, number>>({});
     const [openAddAccount, setOpenAddAccount] = useState(false);
     const [openEditAccount, setOpenEditAccount] = useState(false);
     const [newAccountName, setNewAccountName] = useState('');
@@ -103,12 +104,27 @@ const BankingInvestmentPage = () => {
     useEffect(() => {
         fetchCategories();
     }, [editedInvestments]);
+
+    const allCurrencies: string[] = currencies.map(currency => currency.value);
+    const fetchExchangeRate = () => {
+        GetExchangeRates(portfolioCurrency, allCurrencies)
+            .then(response => {
+                setExchangeRate(response);
+            })
+            .catch(error => {
+                console.error("error getting backend", error);
+            });
+    }
+    useEffect(() => {
+        fetchExchangeRate();
+    }, [portfolioCurrency]);
+
     const selectedAccount = accounts.find(account => account.id === selectedAccountId);
-    const totalWealth = selectedAccount?.investments?.reduce((sum, investment) => sum + investment.amount, 0) ?? 0;
+    const totalWealth = Number((selectedAccount?.investments?.reduce((sum, investment) => sum + investment.amount / exchangeRate[investment.currency], 0) ?? 0).toFixed(2));
 
     const portfolioData = selectedAccount?.investments?.map((investment, index) => ({
         name: investment.name,
-        value: investment.amount,
+        value: Number((investment.amount/exchangeRate[investment.currency]).toFixed(2)),
         color: COLORS[index % COLORS.length],
     }));
 
@@ -118,7 +134,7 @@ const BankingInvestmentPage = () => {
             if (!acc[investment.category]) {
                 acc[investment.category] = { name: investment.category, value: 0 };
             }
-            acc[investment.category].value += investment.amount;
+            acc[investment.category].value += Number((investment.amount/exchangeRate[investment.currency]).toFixed(2));
         });
         return acc;
     }, {} as Record<string, { name: string; value: number }>);
@@ -243,23 +259,24 @@ const BankingInvestmentPage = () => {
         return (
             <div>
                 <Button 
-                    onClick={handleOpenPortfolioCurrency}>{getCurrencyLabel(portfolioCurrency)}</Button>
+                    onClick={handleOpenPortfolioCurrency}>Select currency: {getCurrencyLabel(portfolioCurrency)}</Button>
                 <Dialog open={openPortfolioCurrency} onClose={handleClosePortfolioCurrency}>
                     <DialogContent>
                     <Box component="form" sx={{ display: 'flex', flexWrap: 'wrap' }}>
-                        <Select
-                            labelId="portfolioCurrency-dialog-select-label"
+                        <TextField
                             id="portfolioCurrency-dialog-select"
+                            label="Currency"
+                            select
+                            style={{ width: '100px' }}
                             value={portfolioCurrency}
                             onChange={(e) => handlePortfolioCurrencyChange(e.target.value)}
-                            input={<OutlinedInput label={getCurrencyLabel(portfolioCurrency)} />}
                         >
                             {currencies.map((option) => (
                             <MenuItem key={option.value} value={option.value}>
                                 {option.label}
                             </MenuItem>
                         ))}
-                        </Select>
+                        </TextField>
                     </Box>
                     </DialogContent>
                 </Dialog>
@@ -393,7 +410,7 @@ const BankingInvestmentPage = () => {
                 <Typography variant="h6" style={{ marginTop: '20px' }}>
                 <AccountBalanceIcon /> Wealth
                 </Typography>
-                <Typography variant="body1" >{`USD ${totalWealth} ${portfolioCurrency}`}</Typography>
+                <Typography variant="body1" >{`${portfolioCurrency} ${totalWealth} ${getCurrencyLabel(portfolioCurrency)}`}</Typography>
                 {/* Investments */}
                 <Typography variant="h6" style={{ marginTop: '20px' }}>
                 Investment

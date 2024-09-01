@@ -1,6 +1,7 @@
 package main
 
 import (
+	"HoGiahLang/internal/app"
 	"HoGiahLang/internal/db"
 	"context"
 )
@@ -55,4 +56,8 @@ func (a *App) FetchCategories(userId int64) (db.Categories, error) {
 
 func (a *App) AddCategory(userId int64, category string) error {
 	return db.AddCategory(userId, category)
+}
+
+func (a *App) GetExchangeRates(baseCurrency string, targetCurrencies []string) (app.ExchangeRates, error) {
+	return app.GetExchangeRates(baseCurrency, targetCurrencies)
 }
