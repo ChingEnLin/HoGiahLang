@@ -315,7 +315,7 @@ const BankingInvestmentPage = () => {
                                 <Typography component="span" variant="body2" color="textPrimary">
                                     {account.holder}
                                 </Typography>
-                                {` - ${account.cash + (account.investments?.reduce((sum, investment) => sum + investment.amount, 0) ?? 0)} $`}
+                                {` - ${Number((account.cash/exchangeRate[account.cash_currency] + (account.investments?.reduce((sum, investment) => sum + investment.amount/exchangeRate[account.cash_currency], 0) ?? 0)).toFixed(2))} ${getCurrencyLabel(account.cash_currency)}`}
                             </>} />
                             <IconButton
                                 style={{ position: 'absolute', top: '8px', right: '36px' }}
