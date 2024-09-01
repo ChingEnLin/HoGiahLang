@@ -596,7 +596,7 @@ const BankingInvestmentPage = () => {
                 </Paper>
             ))}
             <Button
-                onClick={() => setEditedInvestments([...editedInvestments, defaultInvestment])}
+                onClick={() => setEditedInvestments([...editedInvestments, { ...defaultInvestment, account_id: selectedAccountId }])}
                 color="primary"
             >
                 Add Investment

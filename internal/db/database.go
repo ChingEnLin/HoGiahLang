@@ -20,7 +20,7 @@ func InitDB() {
 	sqlStmt := `
 		CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, user_name STRING);
 		CREATE TABLE IF NOT EXISTS accounts (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, account_name STRING, holder_name STRING);
-		CREATE TABLE IF NOT EXISTS cash (id INTEGER PRIMARY KEY AUTOINCREMENT, account_id INTEGER, amount FLOAT);
+		CREATE TABLE IF NOT EXISTS cash (id INTEGER PRIMARY KEY AUTOINCREMENT, account_id INTEGER, amount FLOAT, currency STRING);
 		CREATE TABLE IF NOT EXISTS investments (id INTEGER PRIMARY KEY AUTOINCREMENT, account_id INTEGER, investment_name STRING, category STRING, amount FLOAT, currency STRING);
 		CREATE TABLE IF NOT EXISTS categories (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, category STRING);
 	`
@@ -149,7 +149,12 @@ func GetAccountDetails(userId int64) ([]*Account, error) {
 		// get cash amount with account id
 		err = db.QueryRow("SELECT amount, currency FROM cash WHERE account_id = ?", account.Id).Scan(&account.Cash, &account.CashCurrency)
 		if err != nil {
-			return nil, fmt.Errorf("failed to fetch cash: %v", err)
+			if err == sql.ErrNoRows {
+				account.Cash = 0
+				account.CashCurrency = "EUR"
+			} else {
+				return nil, fmt.Errorf("failed to fetch cash: %v", err)
+			}
 		}
 		// get investments with account id
 		investmentQuery := `SELECT id, account_id, investment_name, category, amount, currency FROM investments WHERE account_id = ?`
