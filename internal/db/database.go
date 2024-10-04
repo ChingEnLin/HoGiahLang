@@ -11,7 +11,10 @@ var db *sql.DB
 
 func InitDB() {
 	var err error
-	db, err = sql.Open("sqlite3", "./accounting.db")
+	dbPath := GetDatabasePath()
+	db, err = sql.Open("sqlite3", dbPath)
+	// db, err = sql.Open("sqlite3", "./accounting.db")
+
 	if err != nil {
 		panic(fmt.Sprintf("Error opening database: %q\n", err))
 	}

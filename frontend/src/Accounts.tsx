@@ -52,14 +52,25 @@ const defaultInvestment: Investment = {
     amount: 0,
     currency: 'EUR',
 };
+const defaultAccount: Account = {
+    id: 0,
+    name: '',
+    holder: '',
+    cash: 0,
+    cash_currency: 'EUR',
+    investments: [defaultInvestment],
+    };
+
 const getCurrencyLabel = (currencyValue: string): string | undefined => {
     const currency = currencies.find(c => c.value === currencyValue);
     return currency ? currency.label : undefined;
 };
 
+const defaultCategories = ['Stocks', 'Bonds', 'Real Estate', 'Crypto'];
+
 const BankingInvestmentPage = () => {
-    const [accounts, setAccounts] = useState<Account[]>([]);
-    const [selectedAccountId, setSelectedAccountId] = useState(accounts[0]?.id ?? null);
+    const [accounts, setAccounts] = useState<Account[]>([defaultAccount]);
+    const [selectedAccountId, setSelectedAccountId] = useState(accounts && accounts.length > 0 ? accounts[0].id : 0);
     const [selectedInvestmentId, setSelectedInvestmentId] = useState<number | null>(null);
     const [showOverallData, setShowOverallData] = useState(true);
     const [openPortfolioCurrency, setOpenPortfolioCurrency] = React.useState(false);
@@ -119,7 +130,7 @@ const BankingInvestmentPage = () => {
         fetchExchangeRate();
     }, [portfolioCurrency]);
 
-    const selectedAccount = accounts.find(account => account.id === selectedAccountId);
+    const selectedAccount = accounts?.find(account => account.id === selectedAccountId);
     const totalWealth = Number((selectedAccount?.investments?.reduce((sum, investment) => sum + investment.amount / exchangeRate[investment.currency], 0) ?? 0).toFixed(2));
 
     const portfolioData = selectedAccount?.investments?.map((investment, index) => ({
@@ -129,7 +140,7 @@ const BankingInvestmentPage = () => {
     }));
 
     // Calculate overall data across all accounts categorized by 'category'
-    const overallData = accounts.reduce((acc, account) => {
+    const overallData = accounts?.reduce((acc, account) => {
         account.investments?.forEach(investment => {
             if (!acc[investment.category]) {
                 acc[investment.category] = { name: investment.category, value: 0 };
@@ -139,10 +150,10 @@ const BankingInvestmentPage = () => {
         return acc;
     }, {} as Record<string, { name: string; value: number }>);
 
-    const overallPortfolioData = Object.values(overallData).map((data, index) => ({
+    const overallPortfolioData = overallData ? Object.values(overallData).map((data, index) => ({
         ...data,
         color: COLORS[index % COLORS.length],
-    }));
+    })) : [];
 
     const dataToDisplay = showOverallData ? overallPortfolioData : portfolioData;
     const totalValue = dataToDisplay?.reduce((sum, entry) => sum + entry.value, 0) ?? 0;
@@ -302,7 +313,7 @@ const BankingInvestmentPage = () => {
                 <EditIcon />
                 </IconButton>
                 <List>
-                {accounts.map(account => (
+                {accounts?.map(account => (
                     <ListItem
                         button
                         key={account.id}
@@ -394,6 +405,7 @@ const BankingInvestmentPage = () => {
                 style={{ position: 'absolute', top: '0', right: '0' }}
                 onClick={handleClickOpenEditAccount}
                 title="Edit Account"
+                disabled={!selectedAccount}
                 >
                 <EditIcon />
                 </IconButton>
@@ -542,7 +554,7 @@ const BankingInvestmentPage = () => {
                                         setEditedInvestments(newInvestments);
                                     }
                                 }}
-                                options={categories}
+                                options={categories ? categories : defaultCategories}
                                 renderInput={(params) => (
                                     <TextField
                                         {...params}
