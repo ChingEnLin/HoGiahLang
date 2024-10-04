@@ -5,10 +5,8 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
-import MenuIcon from '@mui/icons-material/Menu';
 import DrawerMenu from '../../components/DrawerMenu';
 import {AddAccount, DeleteAccount, FetchAccountDetails, UpdateCash, UpdateInvestment, DeleteInvestment, FetchCategories, AddCategory, GetExchangeRates} from "../../../wailsjs/go/main/App";
-import { Link } from 'react-router-dom';
 
 type Investment = {
   id: number;
@@ -68,8 +66,6 @@ const getCurrencyLabel = (currencyValue: string): string | undefined => {
     return currency ? currency.label : undefined;
 };
 
-const defaultCategories = ['Stocks', 'Bonds', 'Real Estate', 'Crypto'];
-
 const BankingInvestmentPage = () => {
     const [accounts, setAccounts] = useState<Account[]>([defaultAccount]);
     const [selectedAccountId, setSelectedAccountId] = useState(accounts && accounts.length > 0 ? accounts[0].id : 0);
@@ -87,6 +83,9 @@ const BankingInvestmentPage = () => {
     const [editedCashCurrency, setEditedCashCurrency] = useState(defaultInvestment.currency);
     const [editedInvestments, setEditedInvestments] = useState<Investment[]>([]);
     const [categories, setCategories] = useState<string[]>([]);
+    if (categories === null) {
+      setCategories([]);
+    }
     const [mouseX, setMouseX] = useState<number | null>(null);
     const [mouseY, setMouseY] = useState<number | null>(null);
     const [drawerOpen, setDrawerOpen] = useState(false);
@@ -116,7 +115,7 @@ const BankingInvestmentPage = () => {
     };
     useEffect(() => {
         fetchCategories();
-    }, [editedInvestments]);
+    }, [editedInvestments, openEditAccount]);
 
     const allCurrencies: string[] = currencies.map(currency => currency.value);
     const fetchExchangeRate = () => {
@@ -187,6 +186,7 @@ const BankingInvestmentPage = () => {
         if (selectedAccount) {
             setEditedCash(selectedAccount.cash);
             setEditedInvestments([...selectedAccount.investments ?? []]);
+            fetchCategories();
             setOpenEditAccount(true);
         }
     };
@@ -576,7 +576,7 @@ const BankingInvestmentPage = () => {
                                         setEditedInvestments(newInvestments);
                                     }
                                 }}
-                                options={categories ? categories : defaultCategories}
+                                options={categories}
                                 renderInput={(params) => (
                                     <TextField
                                         {...params}
@@ -585,7 +585,7 @@ const BankingInvestmentPage = () => {
                                         fullWidth
                                         onBlur={(e) => {
                                             const value = e.target.value;
-                                            if (!categories.includes(value)) {
+                                            if (categories && !categories.includes(value)) {
                                                 const newInvestments = [...editedInvestments];
                                                 newInvestments[index].category = value;
                                                 setEditedInvestments(newInvestments);
