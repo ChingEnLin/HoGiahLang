@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Autocomplete, Box, Button, Container, Select, OutlinedInput, Grid, Typography, Paper, List, ListItem, ListItemText, Switch, FormControlLabel, IconButton, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Menu, MenuItem, TextField } from '@mui/material';
+import { Autocomplete, Box, Button, Container, Grid, Typography, Paper, List, ListItem, ListItemText, Switch, FormControlLabel, IconButton, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Menu, MenuItem, TextField } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
-import {AddAccount, DeleteAccount, FetchAccountDetails, UpdateCash, UpdateInvestment, DeleteInvestment, FetchCategories, AddCategory, GetExchangeRates} from "../wailsjs/go/main/App";
-import { set } from 'date-fns';
+import {AddAccount, DeleteAccount, FetchAccountDetails, UpdateCash, UpdateInvestment, DeleteInvestment, FetchCategories, AddCategory, GetExchangeRates} from "../../../wailsjs/go/main/App";
 
 type Investment = {
   id: number;
