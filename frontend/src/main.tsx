@@ -18,3 +18,9 @@ root.render(
         </Router>
     </React.StrictMode>
 );
+
+// root.render(
+//     <React.StrictMode>
+//         <Accounts/>
+//     </React.StrictMode>
+// )

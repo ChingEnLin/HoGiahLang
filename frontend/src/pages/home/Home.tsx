@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography, IconButton, Grid, Avatar } from '@mui/material';
+import { Box, Typography, IconButton, Grid, Avatar, AppBar, Toolbar } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import SavingsIcon from '@mui/icons-material/Savings';
@@ -7,6 +7,7 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import InsertChartIcon from '@mui/icons-material/InsertChart';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import { Link } from 'react-router-dom';
+import DrawerMenu from '../../components/DrawerMenu';
 
 const HomePage = () => {
 return (
@@ -121,7 +122,7 @@ return (
                         height="100px"
                         bgcolor="#CFE8E5"
                         borderRadius="10px"
-                        style={{ cursor: 'pointer' }}
+                        style={{ cursor: 'pointer', textDecoration: 'none', color: 'black' }}
                         component={Link}
                         to="/accounts"
                     >

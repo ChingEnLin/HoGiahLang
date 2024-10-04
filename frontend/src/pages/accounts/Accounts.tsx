@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { Autocomplete, Box, Button, Container, Grid, Typography, Paper, List, ListItem, ListItemText, Switch, FormControlLabel, IconButton, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Menu, MenuItem, TextField } from '@mui/material';
+import { Autocomplete, Box, Button, Container, Grid, Typography, Paper, List, ListItem, ListItemText, Switch, FormControlLabel, IconButton, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Menu, MenuItem, TextField, Drawer, ListItemIcon, Avatar, AppBar, Toolbar, ListItemButton } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import MenuIcon from '@mui/icons-material/Menu';
+import DrawerMenu from '../../components/DrawerMenu';
 import {AddAccount, DeleteAccount, FetchAccountDetails, UpdateCash, UpdateInvestment, DeleteInvestment, FetchCategories, AddCategory, GetExchangeRates} from "../../../wailsjs/go/main/App";
+import { Link } from 'react-router-dom';
 
 type Investment = {
   id: number;
@@ -86,12 +89,12 @@ const BankingInvestmentPage = () => {
     const [categories, setCategories] = useState<string[]>([]);
     const [mouseX, setMouseX] = useState<number | null>(null);
     const [mouseY, setMouseY] = useState<number | null>(null);
+    const [drawerOpen, setDrawerOpen] = useState(false);
     const user = 1;
 
     const fetchAccount = () => {
         FetchAccountDetails(user)
             .then(response => {
-                console.log("get account response", response);
                 setAccounts(response);
             })
             .catch(error => {
@@ -264,6 +267,13 @@ const BankingInvestmentPage = () => {
         setCategories((prevCategories) => [...prevCategories, newCategory]);
         AddCategory(user, newCategory);
     };
+    // Toggle Drawer open/close
+    const toggleDrawer = (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
+        if (event.type === 'keydown' && ((event as React.KeyboardEvent).key === 'Tab' || (event as React.KeyboardEvent).key === 'Shift')) {
+        return;
+        }
+        setDrawerOpen(open);
+    };
 
     const portfolioCurrencyDialog = () => {
         return (
@@ -293,15 +303,28 @@ const BankingInvestmentPage = () => {
             </div>
         )
     }
+
     return (
-        <Container style={{ marginTop: '20px' }}>
+        <Container style={{ backgroundColor: '#CFE8E5', margin: '0', padding: '0', textAlign: 'center' }}>
+        <AppBar style={{ position: "relative", backgroundColor: "#3994B3" }} >
+            <Toolbar>
+            {/* Menu Button */}
+            <IconButton edge="start" color="inherit" aria-label="menu" onClick={toggleDrawer(true)}>
+                <DrawerMenu />
+            </IconButton>
+            <Typography variant="h6" component="div">
+                HoGiahLang
+            </Typography>
+            </Toolbar>
+        </AppBar>
+        
         <Grid container spacing={2}>
             {/* Left Section */}
-            <Grid item xs={5}>
-            <Typography variant="h6">Banking & Investment</Typography>
+            <Grid item xs={5} >
+            <Typography variant="h6" margin={'20px'}>Banking & Investment</Typography>
 
             {/* Accounts Section */}
-            <Paper style={{ padding: '20px', marginBottom: '20px', position: 'relative' }}>
+            <Paper style={{ padding: '20px', margin: '20px', position: 'relative' }}>
                 <Typography variant="h5">Accounts</Typography>
                 {/* Edit Button */}
                 <IconButton
@@ -346,8 +369,8 @@ const BankingInvestmentPage = () => {
             </Paper>
 
             {/* Investment Portfolio */}
-            <Typography variant="h6">Investment Portfolio</Typography>
-            <Paper style={{ padding: '20px', position: 'relative' }}>
+            <Typography variant="h6" margin='20px'>Investment Portfolio</Typography>
+            <Paper style={{ padding: '20px', position: 'relative', margin: '20px' }}>
                 {/* Toggle Switch */}
                 <div style={{ position: 'absolute', top: '0px', right: '0px' }}>
                     <FormControlLabel
@@ -397,8 +420,8 @@ const BankingInvestmentPage = () => {
             {/* Right Section */}
 
             <Grid item xs={7}>
-            <Typography variant="h6">Account Detail</Typography>
-            <Paper style={{ padding: '20px', position: 'relative'}}>
+            <Typography variant="h6" margin='20px'>Account Detail</Typography>
+            <Paper style={{ padding: '20px', position: 'relative', margin: '20px'}}>
                 {/* Edit Button */}
                 <IconButton
                 style={{ position: 'absolute', top: '0', right: '0' }}
