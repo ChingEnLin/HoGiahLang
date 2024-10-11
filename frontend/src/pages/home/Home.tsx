@@ -4,10 +4,9 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import SavingsIcon from '@mui/icons-material/Savings';
 import NotificationsIcon from '@mui/icons-material/Notifications';
-import InsertChartIcon from '@mui/icons-material/InsertChart';
+import DataSaverOffIcon from '@mui/icons-material/DataSaverOff';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import { Link } from 'react-router-dom';
-import DrawerMenu from '../../components/DrawerMenu';
 
 const HomePage = () => {
 return (
@@ -126,7 +125,7 @@ return (
                         component={Link}
                         to="/accounts"
                     >
-                        <InsertChartIcon fontSize="large" />
+                        <DataSaverOffIcon fontSize="large" />
                         <Typography ml={1}>Financial & Asset Reports</Typography>
                     </Box>
                 </Grid>

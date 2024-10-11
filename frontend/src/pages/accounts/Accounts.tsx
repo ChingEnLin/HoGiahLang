@@ -150,6 +150,13 @@ const BankingInvestmentPage = () => {
         });
         return acc;
     }, {} as Record<string, { name: string; value: number }>);
+    // Append cash to overall data
+    accounts?.forEach(account => {
+        if (!overallData['Cash']) {
+            overallData['Cash'] = { name: 'Cash', value: 0 };
+        }
+        overallData['Cash'].value += Number((account.cash/exchangeRate[account.cash_currency]).toFixed(2));
+    });
 
     const overallPortfolioData = overallData ? Object.values(overallData).map((data, index) => ({
         ...data,
