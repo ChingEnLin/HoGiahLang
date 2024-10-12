@@ -34,6 +34,10 @@ export function GetExchangeRates(arg1, arg2) {
   return window['go']['main']['App']['GetExchangeRates'](arg1, arg2);
 }
 
+export function SaveInvestmentStatistics(arg1) {
+  return window['go']['main']['App']['SaveInvestmentStatistics'](arg1);
+}
+
 export function UpdateCash(arg1, arg2, arg3) {
   return window['go']['main']['App']['UpdateCash'](arg1, arg2, arg3);
 }

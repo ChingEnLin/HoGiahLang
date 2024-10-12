@@ -1,3 +1,24 @@
+export namespace app {
+	
+	export class InvestmentTrimmed {
+	    category: string;
+	    amount: number;
+	    currency: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new InvestmentTrimmed(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.category = source["category"];
+	        this.amount = source["amount"];
+	        this.currency = source["currency"];
+	    }
+	}
+
+}
+
 export namespace db {
 	
 	export class Investment {

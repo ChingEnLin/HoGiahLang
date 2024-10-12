@@ -19,6 +19,8 @@ export function FetchCategories(arg1:number):Promise<db.Categories>;
 
 export function GetExchangeRates(arg1:string,arg2:Array<string>):Promise<app.ExchangeRates>;
 
+export function SaveInvestmentStatistics(arg1:Array<app.InvestmentTrimmed>):Promise<void>;
+
 export function UpdateCash(arg1:number,arg2:number,arg3:string):Promise<void>;
 
 export function UpdateInvestment(arg1:Array<db.Investment>):Promise<void>;

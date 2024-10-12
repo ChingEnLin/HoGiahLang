@@ -6,8 +6,13 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import DrawerMenu from '../../components/DrawerMenu';
-import {AddAccount, DeleteAccount, FetchAccountDetails, UpdateCash, UpdateInvestment, DeleteInvestment, FetchCategories, AddCategory, GetExchangeRates} from "../../../wailsjs/go/main/App";
+import {AddAccount, DeleteAccount, FetchAccountDetails, UpdateCash, UpdateInvestment, DeleteInvestment, FetchCategories, AddCategory, GetExchangeRates, SaveInvestmentStatistics} from "../../../wailsjs/go/main/App";
 
+type InvestmentTrimmed = {
+    category: string;
+    amount: number;
+    currency: string;
+};
 type Investment = {
   id: number;
   account_id: number;
@@ -246,6 +251,22 @@ const BankingInvestmentPage = () => {
         setOpenPortfolioCurrency(false);
     };
 
+    // Function to save the record
+    const handleSaveRecord = async () => {
+        const exportedData: InvestmentTrimmed[] = dataToDisplay?.map(data => ({
+            category: data.name,
+            amount: data.value,
+            currency: portfolioCurrency,
+        })) ?? [];
+        SaveInvestmentStatistics(exportedData)
+            .then(() => {
+                console.log('Investment statistics saved successfully.');
+            })
+            .catch(error => {
+                console.error('Error saving investment statistics:', error);
+            });
+    };
+
     // Function to handle the opening of the context menu for deleting an investment
     const handleContextMenu = (event: React.MouseEvent, id: number) => {
         event.preventDefault();
@@ -421,6 +442,15 @@ const BankingInvestmentPage = () => {
                         </ListItem>
                     ))}
                 </List>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleSaveRecord}
+                    style={{ fontSize: '10px' }}
+                    disabled={!showOverallData}
+                >
+                    Save Asset Record
+                </Button>
             </Paper>
             </Grid>
 

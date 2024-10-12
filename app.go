@@ -4,6 +4,9 @@ import (
 	"HoGiahLang/internal/app"
 	"HoGiahLang/internal/db"
 	"context"
+	"fmt"
+
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 // App struct
@@ -60,4 +63,21 @@ func (a *App) AddCategory(userId int64, category string) error {
 
 func (a *App) GetExchangeRates(baseCurrency string, targetCurrencies []string) (app.ExchangeRates, error) {
 	return app.GetExchangeRates(baseCurrency, targetCurrencies)
+}
+
+func (a *App) SaveInvestmentStatistics(investments []app.InvestmentTrimmed) error {
+	// Ask the user to choose a location to save the file
+	savePath, err := runtime.SaveFileDialog(a.ctx, runtime.SaveDialogOptions{
+		DefaultFilename: "portfolio.csv",
+		Title:           "Save Portfolio as CSV",
+	})
+	if err != nil {
+		return err
+	}
+
+	if savePath == "" {
+		return fmt.Errorf("no path selected")
+	}
+
+	return app.SaveInvestmentStatistics(savePath, investments)
 }
