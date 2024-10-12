@@ -61,6 +61,14 @@ To build the application for your operating system:
 wails build
 ```
 
+### Testing the Application
+
+To run the tests:
+
+```bash
+go test ./<package name in backend>
+```
+
 This command will generate the executable in the `build/bin` directory.
 
 ## Project Structure
