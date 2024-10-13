@@ -60,6 +60,7 @@ To build the application for your operating system:
 ```bash
 wails build
 ```
+This command will generate the executable in the `build/bin` directory.
 
 ### Testing the Application
 
@@ -69,18 +70,30 @@ To run the tests:
 go test ./<package name in backend>
 ```
 
-This command will generate the executable in the `build/bin` directory.
+## Release of the software
+
+The release of the software is automated using the GitHub Actions. The release is triggered when a new tag is pushed to the repository. The release will create a new release with the binaries for MacOS universal architechture.
+
+### Versioning
+
+**Semantic versioning** is used for versioning the software. The [action pipeline](.github/workflows/semantic_versioning.yml) will create a new release by incrementing the version number based on the commit messages and tag the repo with calculated version.
 
 ## Project Structure
 
-- **backend/**: Contains the Go backend code for database interactions.
-  - `database.go`: SQLite database setup and operations.
-  - `main.go`: Application entry point and Wails bindings.
+- **internal/**: Contains the Go backend code for database interactions.
+  - **app/**
+    - `os.go`: OS-specific functions.
+    - `processing.go`: Functions for processing data.
+  - **db/**
+    - `database.go`: SQLite database setup and operations.
+    - `database_test.go`: Tests for the database operations.
+    - `utilites.go`: Utility functions for database operations.
 - **frontend/**: Contains the React frontend code.
-  - `src/`: The source code for the React app.
-    - `Account.tsx`: Main component for the application.
-    - `wails.d.ts`: TypeScript definitions for Wails.
-  - `public/`: Static assets.
+  - **src/**
+    - **components/**: React components.
+    - **pages/**: React pages.
+  - `main.tsx`: Entry point for the React application.
+- `main.go`: Application entry point and Wails bindings.
 - **build/**: Output directory for the built application.
 - **wails.json**: Wails project configuration.
 
